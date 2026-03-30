@@ -20,9 +20,9 @@ The LDPC decoder is the missing piece in a fully open ATSC 3.0 receive chain.
 
 | Phase | Implementation | Purpose | Status |
 |-------|---------------|---------|--------|
-| 1 | Python | Reference prototype, test vector generation | In progress |
-| 2 | Rust + SIMD | Real-time software decode (~20 Mbps) | Planned |
-| 3 | FPGA (Arty A7-100T) | Full-rate decode (~25+ Mbps) | Planned |
+| 1 | Python | Reference prototype, test vector generation | ✅ Complete (20/20 tests pass) |
+| 2 | Rust + SIMD | Real-time software decode (~20 Mbps) | ✅ Complete (11/11 tests, bit-exact vs Python) |
+| 3 | FPGA (Arty A7-100T) | Full-rate decode (~25+ Mbps) | 🔄 RTL complete, sim pending (needs iverilog) |
 
 ## Algorithm
 
