@@ -28,25 +28,21 @@ class LdpcEncoder:
         self.H_info = code.H[:, :code.K].toarray().astype(np.int64)
         H_parity_dense = code.H[:, code.K:].toarray().astype(np.int64)
 
-        # Pre-compute: GF(2) row-reduction of H_parity to get pivot info
-        self._pivot_order, self._reduced_aug = self._gf2_rref(H_parity_dense)
-
-        # Pre-compute: GF(2) inverse (if full rank) for Gaussian cross-check
+        # Pre-compute: GF(2) inverse (if full rank)
         self._H_parity_inv = None
         try:
             self._H_parity_inv = self._gf2_inverse(H_parity_dense)
         except ValueError:
-            pass  # Singular — Gaussian method won't be available
+            import warnings
+            warnings.warn("H_parity is singular; Gaussian cross-check unavailable")
 
     def encode(self, info_bits: np.ndarray) -> np.ndarray:
-        """Encode using pre-computed GF(2) decomposition (fast)."""
+        """Encode using pre-computed GF(2) inverse of H_parity."""
         assert info_bits.shape == (self.K,) and info_bits.dtype == np.uint8
+        assert self._H_parity_inv is not None, "H_parity is singular, cannot encode"
 
-        # s = H_info @ info_bits mod 2
         s = (self.H_info @ info_bits.astype(np.int64)) % 2
-
-        # Solve H_parity @ p = s using pre-computed row reduction
-        parity = self._gf2_solve_precomputed(s)
+        parity = ((self._H_parity_inv @ s) % 2).astype(np.uint8)
 
         codeword = np.zeros(self.N, dtype=np.uint8)
         codeword[:self.K] = info_bits
@@ -54,58 +50,8 @@ class LdpcEncoder:
         return codeword
 
     def encode_gaussian(self, info_bits: np.ndarray) -> np.ndarray:
-        """Encode using pre-computed GF(2) inverse of H_parity."""
-        assert self._H_parity_inv is not None, "H_parity is singular, Gaussian not available"
-        assert info_bits.shape == (self.K,) and info_bits.dtype == np.uint8
-
-        s = (self.H_info @ info_bits.astype(np.int64)) % 2
-        parity = (self._H_parity_inv @ s) % 2
-
-        codeword = np.zeros(self.N, dtype=np.uint8)
-        codeword[:self.K] = info_bits
-        codeword[self.K:] = parity.astype(np.uint8)
-        return codeword
-
-    def _gf2_solve_precomputed(self, b: np.ndarray) -> np.ndarray:
-        """Solve using stored pivot order — apply same row ops to b."""
-        M = self.M
-        # Apply the same elimination to b as was done to H_parity
-        # We stored the reduced augmented form; use the pivot info
-        # Actually faster: just use the inverse if available
-        if self._H_parity_inv is not None:
-            return ((self._H_parity_inv @ b) % 2).astype(np.uint8)
-
-        # Fallback: full solve
-        H_parity_dense = self.code.H[:, self.K:].toarray().astype(np.int64)
-        return self._gf2_solve(H_parity_dense, b)
-
-    @staticmethod
-    def _gf2_rref(A: np.ndarray) -> tuple[list[int], np.ndarray]:
-        """Row reduce A over GF(2), return pivot columns and augmented form."""
-        M, N = A.shape
-        aug = A.copy()
-        pivots = []
-        pivot_row = 0
-
-        for col in range(N):
-            found = -1
-            for row in range(pivot_row, M):
-                if aug[row, col] == 1:
-                    found = row
-                    break
-            if found == -1:
-                continue
-
-            aug[[pivot_row, found]] = aug[[found, pivot_row]]
-            pivots.append(col)
-
-            for row in range(M):
-                if row != pivot_row and aug[row, col] == 1:
-                    aug[row] = (aug[row] + aug[pivot_row]) % 2
-
-            pivot_row += 1
-
-        return pivots, aug
+        """Encode using GF(2) inverse (same as encode, kept for cross-check API)."""
+        return self.encode(info_bits)
 
     @staticmethod
     def _gf2_solve(A: np.ndarray, b: np.ndarray) -> np.ndarray:

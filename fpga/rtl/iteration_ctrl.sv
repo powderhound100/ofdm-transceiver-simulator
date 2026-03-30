@@ -129,6 +129,13 @@ module iteration_ctrl #(
                     state <= S_CNU_PROCESS;
                 end
 
+                // TODO(high): has_edge from base_matrix_rom has 1-cycle latency.
+                // Current design reads has_edge in S_CNU_PROCESS but the ROM
+                // address was set when entering S_CNU_FETCH. From the second
+                // column onward, the col_cnt increment in S_CNU_PROCESS means
+                // has_edge reflects the PREVIOUS column, not the current one.
+                // Fix: add a fetch-wait cycle for each column, or pipeline
+                // has_edge to align with the column being processed.
                 S_CNU_PROCESS: begin
                     if (has_edge) begin
                         if (!seen_first_edge) begin
@@ -205,6 +212,13 @@ module iteration_ctrl #(
                 // ---------------------------------------------------------
                 // Syndrome check phase
                 // ---------------------------------------------------------
+                // TODO(high): The syndrome checker needs column-by-column hard
+                // bits fed via first_col/last_col/last_row strobes, but this
+                // state does not drive any column scanning. The checker never
+                // receives data and syndrome_pass is undefined.
+                // Fix: sweep all row-blocks x col-blocks here (like CNU phase)
+                // feeding the syndrome checker, OR compute syndrome incrementally
+                // during VNU and just read the result here.
                 S_SYNDROME: begin
                     // Allow syndrome checker some cycles to evaluate
                     state <= S_SYNDROME_WAIT;

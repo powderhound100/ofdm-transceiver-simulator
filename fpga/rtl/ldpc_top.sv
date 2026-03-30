@@ -199,6 +199,12 @@ module ldpc_top #(
     // For simplicity we use a flat RAM addressed by (col_block * Z + z_idx)
     // Actually we need edge-based storage. Simplified: we store per VN block.
     // =========================================================================
+    // TODO(high): v2c/c2v memories are sized per-node (N and M entries) but a
+    // flooding decoder needs per-edge storage (num_edges >> N,M). For the 802.11n
+    // code, there are 2376 edges vs 648+324 nodes. Current design loses multi-edge
+    // messages when multiple check nodes connect to the same variable node.
+    // Fix: size by total edges, or restructure as (row_block x col_block x Z).
+    // Also: use registered reads (not combinational) so synthesis infers BRAM.
     // V2C storage: NB blocks of Z elements, each W bits
     logic [W-1:0] v2c_mem [0:N-1];
 
@@ -399,8 +405,9 @@ module ldpc_top #(
                     end
 
                     if (ctrl_done) begin
-                        top_state  <= TOP_OUTPUT;
-                        output_col <= '0;
+                        top_state   <= TOP_OUTPUT;
+                        output_col  <= '0;
+                        output_addr <= '0;
                     end
                 end
 

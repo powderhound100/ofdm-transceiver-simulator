@@ -9,8 +9,6 @@ from __future__ import annotations
 
 import json
 import os
-import struct
-import sys
 import numpy as np
 
 from ldpc_code import make_wifi_code, QcLdpcCode
@@ -102,8 +100,13 @@ def generate_test_vectors(output_dir: str = "../test_vectors"):
         rng_ch = np.random.default_rng(seed)
         llr, sigma2 = transmit(cw, code.rate, snr_db, rng_ch)
 
-        # Decode with iteration capture
-        result = dec.decode(llr, capture_iterations=True)
+        # Quantize to f32 and back to f64 so the decoder input matches
+        # what Rust will see when loading the f32 test vector files.
+        # This ensures bit-exact decoded output across implementations.
+        llr_f32 = llr.astype(np.float32).astype(np.float64)
+
+        # Decode with iteration capture (using f32-quantized LLR)
+        result = dec.decode(llr_f32, capture_iterations=True)
         decoded = result['decoded_bits']
         num_iters = result['num_iterations']
         converged = result['converged']
@@ -117,7 +120,7 @@ def generate_test_vectors(output_dir: str = "../test_vectors"):
         # llr_snr_<label>_f32.bin — N float32 values, little-endian
         f32_path = os.path.join(output_dir, f"llr_snr_{label}_f32.bin")
         with open(f32_path, "wb") as f:
-            f.write(struct.pack(f"<{code.N}f", *llr.astype(np.float32)))
+            f.write(llr.astype(np.float32).tobytes())
         print(f"  {f32_path}")
 
         # llr_snr_<label>_6bit.hex — N lines of 2-char hex
@@ -211,7 +214,7 @@ def verify_round_trip(output_dir: str, code: QcLdpcCode,
     label = "noiseless"
     f32_path = os.path.join(output_dir, f"llr_snr_{label}_f32.bin")
     with open(f32_path, "rb") as f:
-        llr_reload = np.array(struct.unpack(f"<{code.N}f", f.read()), dtype=np.float32)
+        llr_reload = np.frombuffer(f.read(), dtype=np.float32)
     # Compare against the noiseless LLR (regenerate to compare)
     assert llr_reload.shape == (code.N,)
     print(f"  llr_snr_{label}_f32.bin: shape OK")

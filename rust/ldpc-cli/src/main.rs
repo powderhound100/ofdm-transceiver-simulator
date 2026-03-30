@@ -163,11 +163,12 @@ fn main() {
             // Decode
             let result = decoder.decode(&llr);
 
-            // Count errors
+            // Count errors in info bits only (matching Python convention)
             let bit_errors: usize = result
                 .decoded_bits
                 .iter()
-                .zip(codeword.iter())
+                .take(code.k)
+                .zip(codeword.iter().take(code.k))
                 .filter(|(a, b)| a != b)
                 .count();
 
@@ -178,7 +179,7 @@ fn main() {
             total_iters += result.iterations;
         }
 
-        let ber = total_bit_errors as f64 / (num_frames as f64 * code.n as f64);
+        let ber = total_bit_errors as f64 / (num_frames as f64 * code.k as f64);
         let fer = total_frame_errors as f64 / num_frames as f64;
         let avg_iter = total_iters as f64 / num_frames as f64;
 
