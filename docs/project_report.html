@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATSC 3.0 LDPC Decoder — Complete Technical Report</title>
+<style>
+  :root {
+    --bg: #1e1e2e; --surface: #181825; --card: #1e1e2e;
+    --text: #cdd6f4; --subtext: #a6adc8; --blue: #89b4fa;
+    --green: #a6e3a1; --red: #f38ba8; --yellow: #f9e2af;
+    --mauve: #cba6f7; --teal: #94e2d5; --peach: #fab387;
+    --border: #313244; --overlay: #6c7086;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+    max-width: 1200px; margin: 0 auto; padding: 20px 40px;
+  }
+  h1 { color: var(--blue); font-size: 2em; margin: 40px 0 10px; border-bottom: 2px solid var(--blue); padding-bottom: 8px; }
+  h2 { color: var(--mauve); font-size: 1.5em; margin: 35px 0 15px; border-left: 4px solid var(--mauve); padding-left: 12px; }
+  h3 { color: var(--teal); font-size: 1.2em; margin: 25px 0 10px; }
+  h4 { color: var(--peach); font-size: 1.05em; margin: 20px 0 8px; }
+  p { margin: 10px 0; }
+  a { color: var(--blue); }
+  code { background: var(--surface); padding: 2px 6px; border-radius: 4px; font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 0.9em; color: var(--green); }
+  pre { background: var(--surface); padding: 16px; border-radius: 8px; overflow-x: auto; margin: 15px 0; border: 1px solid var(--border); }
+  pre code { padding: 0; background: none; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+  th { background: var(--surface); color: var(--blue); padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: rgba(137, 180, 250, 0.05); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 15px 0; }
+  .highlight { border-left: 4px solid var(--yellow); padding-left: 16px; margin: 15px 0; background: rgba(249, 226, 175, 0.05); padding: 12px 16px; border-radius: 0 8px 8px 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0; }
+  .metric { text-align: center; padding: 15px; }
+  .metric .value { font-size: 2em; font-weight: bold; color: var(--green); }
+  .metric .label { color: var(--subtext); font-size: 0.85em; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin: 0 4px; }
+  .tag-python { background: rgba(249, 226, 175, 0.2); color: var(--yellow); }
+  .tag-rust { background: rgba(250, 179, 135, 0.2); color: var(--peach); }
+  .tag-fpga { background: rgba(137, 180, 250, 0.2); color: var(--blue); }
+  .tag-pass { background: rgba(166, 227, 161, 0.2); color: var(--green); }
+  .tag-fail { background: rgba(243, 139, 168, 0.2); color: var(--red); }
+  svg { max-width: 100%; }
+  .toc { background: var(--surface); padding: 20px 30px; border-radius: 12px; margin: 20px 0; }
+  .toc a { text-decoration: none; display: block; padding: 3px 0; }
+  .toc a:hover { color: var(--teal); }
+  .diagram { background: var(--surface); padding: 20px; border-radius: 12px; margin: 15px 0; text-align: center; overflow-x: auto; }
+  .diagram pre { background: none; border: none; text-align: left; display: inline-block; color: var(--blue); }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+  .compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 15px; }
+  .compare-card h4 { margin-top: 0; }
+  @media (max-width: 800px) { .grid, .compare-grid { grid-template-columns: 1fr; } body { padding: 10px 15px; } }
+</style>
+</head>
+<body>
+
+<!-- ===================================================================== -->
+<!-- HEADER -->
+<!-- ===================================================================== -->
+<div style="text-align:center; margin: 30px 0 40px;">
+  <h1 style="border:none; font-size: 2.5em; margin-bottom: 5px;">ATSC 3.0 LDPC Decoder</h1>
+  <p style="color: var(--subtext); font-size: 1.1em;">Complete Technical Report — Python Reference, Rust SIMD, FPGA RTL</p>
+  <p style="color: var(--overlay); font-size: 0.9em;">Generated March 2026 &middot; IEEE 802.11n Rate-1/2 N=648 Mock Code</p>
+</div>
+
+<div class="grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="card metric"><div class="value">648</div><div class="label">Codeword Length (N)</div></div>
+  <div class="card metric"><div class="value">0.5</div><div class="label">Code Rate (K/N)</div></div>
+  <div class="card metric"><div class="value">0.75</div><div class="label">NMS Alpha</div></div>
+  <div class="card metric"><div class="value">3</div><div class="label">Implementations</div></div>
+</div>
+
+<!-- ===================================================================== -->
+<!-- TABLE OF CONTENTS -->
+<!-- ===================================================================== -->
+<div class="toc">
+  <h3 style="margin-top:0;">Contents</h3>
+  <a href="#sec1">1. System Architecture &amp; Block Diagrams</a>
+  <a href="#sec2">2. LDPC Encoder — Deep Dive</a>
+  <a href="#sec3">3. LDPC Decoder — Normalized Min-Sum Algorithm</a>
+  <a href="#sec4">4. Channel Modeling — Why It Matters</a>
+  <a href="#sec5">5. Channel Estimation &amp; Equalization</a>
+  <a href="#sec6">6. OFDM Signal Chain</a>
+  <a href="#sec7">7. Test Data Generation &amp; Validation</a>
+  <a href="#sec8">8. BER Performance — All Modulations &amp; Channels</a>
+  <a href="#sec9">9. Cross-Implementation Comparison: Python vs Rust vs FPGA</a>
+  <a href="#sec10">10. Technical Tradeoffs &amp; Design Decisions</a>
+</div>
+
+<!-- ===================================================================== -->
+<!-- 1. SYSTEM ARCHITECTURE -->
+<!-- ===================================================================== -->
+<h1 id="sec1">1. System Architecture &amp; Block Diagrams</h1>
+
+<h3>End-to-End Signal Chain</h3>
+<div class="diagram"><pre>
+ INFO BITS (324)                                                    DECODED BITS (324)
+      |                                                                    ^
+      v                                                                    |
+ +----------+    +---------+    +------+    +----------+    +---------+    +----------+
+ |  LDPC    |--->|  QAM    |--->| OFDM |--->| CHANNEL  |--->|  OFDM   |--->|   LDPC   |
+ | ENCODER  |    | MAPPER  |    | MOD  |    | (multi-  |    | DEMOD   |    |  DECODER |
+ | (P2/R2)  |    | (QPSK/  |    | IFFT |    |  path +  |    | FFT +   |    |  (NMS)   |
+ |          |    | 16/64)  |    | + CP |    |  AWGN)   |    | EQ + LS |    |  (P4/R2) |
+ +----------+    +---------+    +------+    +----------+    +---------+    +----------+
+  648 bits        324 sym       IQ samples   IQ + noise     LLR (648)     648 hard bits
+</pre></div>
+
+<h3>LDPC Decoder Internal Architecture</h3>
+<div class="diagram"><pre>
+                    Channel LLR [N=648]
+                           |
+                           v
+                  +------------------+
+                  | Variable Node    |  posterior[v] = channel[v] + sum(c2v into v)
+                  | Update (VNU)     |  v2c[v->c] = posterior[v] - c2v[c->v]
+                  +------------------+
+                           |
+                     v2c messages
+                           |
+                  +------------------+
+                  | Syndrome Check   |  H @ hard_bits % 2 == 0 ?
+                  | (early stop)     |  If yes: CONVERGED, output bits
+                  +------------------+
+                           |
+                     if not converged
+                           |
+                  +------------------+
+                  | Check Node       |  sign_product = XOR of signs
+                  | Update (CNU)     |  min1, min2 = two smallest |v2c|
+                  | Normalized       |  c2v[c->v] = 0.75 * ext_sign *
+                  | Min-Sum          |    (min2 if argmin else min1)
+                  +------------------+
+                           |
+                     c2v messages
+                           |
+                     loop back to VNU (up to 50 iterations)
+</pre></div>
+
+<h3>FPGA RTL Module Hierarchy</h3>
+<div class="diagram"><pre>
+                        ldpc_top.sv
+                    (top-level FSM: IDLE -> LOAD -> ITERATE -> OUTPUT)
+                           |
+        +------------------+------------------+-------------------+
+        |                  |                  |                   |
+  llr_input_buffer   iteration_ctrl    output_buffer      base_matrix_rom
+        |              |         |            |                   |
+        |     +--------+--------+--------+   |                   |
+        |     |        |        |        |   |                   |
+        |   check_   variable  message  syndrome              shift
+        |   node_    node_     _ram     _checker              values
+        |   unit     unit                                       |
+        |     |        |                                   barrel_shifter
+        |     |        |
+        |  +--+--+  +--+--+
+        |  | sign |  | sat |
+        |  | xor  |  | add |
+        |  | tree |  +-----+
+        |  +------+
+        |  | min2 |
+        |  |finder|
+        |  +------+
+</pre></div>
+
+
+<!-- ===================================================================== -->
+<!-- 2. LDPC ENCODER -->
+<!-- ===================================================================== -->
+<h1 id="sec2">2. LDPC Encoder — Deep Dive</h1>
+
+<h3>The Parity-Check Matrix H</h3>
+<p>The foundation of any LDPC code is its <strong>parity-check matrix H</strong>, a sparse binary matrix of dimensions M&times;N where M = N - K. For our 802.11n rate-1/2 code:</p>
+
+<table>
+  <tr><th>Parameter</th><th>Value</th><th>Meaning</th></tr>
+  <tr><td>N</td><td>648</td><td>Codeword length (bits)</td></tr>
+  <tr><td>K</td><td>324</td><td>Information bits</td></tr>
+  <tr><td>M</td><td>324</td><td>Parity-check equations</td></tr>
+  <tr><td>Z</td><td>27</td><td>Lifting factor (circulant block size)</td></tr>
+  <tr><td>Base matrix</td><td>12&times;24</td><td>Each entry expands to a 27&times;27 circulant</td></tr>
+  <tr><td>Rank(H)</td><td>320</td><td>4 dependent rows (normal for 802.11n)</td></tr>
+  <tr><td>Total edges</td><td>2,376</td><td>Non-zero entries in H</td></tr>
+</table>
+
+<h3>QC-LDPC Structure</h3>
+<p>The matrix H is not random — it has <strong>Quasi-Cyclic (QC)</strong> structure. The 12&times;24 base matrix contains entries in {-1, 0, 1, ..., 26}. Each entry <em>s</em> expands to a 27&times;27 <strong>circulant permutation matrix</strong> (the identity matrix cyclically shifted right by <em>s</em> positions). Entry -1 expands to the all-zero matrix.</p>
+
+<p>This structure is what makes the code both powerful and practical:</p>
+<ul>
+  <li><strong>Encoding:</strong> The near-staircase parity submatrix enables O(N) encoding via back-substitution</li>
+  <li><strong>Decoding:</strong> The QC structure means Z=27 check nodes in the same row-block have identical connectivity patterns (just shifted) — perfect for SIMD parallelism in Rust and barrel-shifter routing in FPGA</li>
+  <li><strong>Storage:</strong> Only the 12&times;24 base matrix needs to be stored (288 values), not the full 324&times;648 H matrix</li>
+</ul>
+
+<h3>Encoding Algorithm</h3>
+<p>Given information bits <strong>i</strong> (length K=324), we need parity bits <strong>p</strong> (length M=324) such that H&middot;[<strong>i</strong> | <strong>p</strong>]<sup>T</sup> = <strong>0</strong> (mod 2).</p>
+
+<div class="highlight">
+  <strong>Method: Pre-computed GF(2) Inverse</strong><br>
+  Partition H = [H<sub>info</sub> | H<sub>parity</sub>]. The syndrome is s = H<sub>info</sub>&middot;i (mod 2). The parity bits are p = H<sub>parity</sub><sup>-1</sup>&middot;s (mod 2). We pre-compute H<sub>parity</sub><sup>-1</sup> once at initialization using Gaussian elimination over GF(2). Per-frame cost drops from O(M<sup>3</sup>) to O(M&middot;K).
+</div>
+
+<h4>Verification: 1,000 Random Codewords</h4>
+<pre><code>Test 1: 1000 random vectors with primary encoder...
+  PASS: All 1000 codewords have zero syndrome
+Test 2: Cross-check Gaussian elimination (100 trials)...
+  PASS: Both methods produce identical codewords
+Test 3: All-zero info bits...
+  PASS: All-zero codeword</code></pre>
+
+
+<!-- ===================================================================== -->
+<!-- 3. LDPC DECODER -->
+<!-- ===================================================================== -->
+<h1 id="sec3">3. LDPC Decoder — Normalized Min-Sum</h1>
+
+<h3>Why Min-Sum Instead of Belief Propagation?</h3>
+
+<div class="compare-grid">
+  <div class="compare-card">
+    <h4 style="color: var(--green);">Belief Propagation (BP)</h4>
+    <p>CNU computes: product of tanh(v2c/2)</p>
+    <p>Needs lookup tables or CORDIC</p>
+    <p>Best performance (~0 dB from Shannon)</p>
+    <p>Complex in hardware</p>
+  </div>
+  <div class="compare-card">
+    <h4 style="color: var(--blue);">Normalized Min-Sum (NMS)</h4>
+    <p>CNU computes: min of |v2c| &times; XOR of signs</p>
+    <p>Just comparators + XOR gates</p>
+    <p>~0.2 dB from BP (with &alpha;=0.75)</p>
+    <p><strong>10x simpler in hardware</strong></p>
+  </div>
+  <div class="compare-card">
+    <h4 style="color: var(--peach);">Our Choice</h4>
+    <p>NMS with &alpha; = 0.75</p>
+    <p>0.75 = 1 - 1/4 = <code>x - (x &gt;&gt;&gt; 2)</code></p>
+    <p><strong>Zero DSP slices needed</strong></p>
+    <p>Standard in all commercial decoders</p>
+  </div>
+</div>
+
+<h3>The Algorithm in Detail</h3>
+
+<p>The decoder operates on the <strong>Tanner graph</strong> — a bipartite graph with N=648 <strong>variable nodes</strong> (one per bit) and M=324 <strong>check nodes</strong> (one per parity equation). Messages flow along the 2,376 edges connecting them.</p>
+
+<h4>Initialization</h4>
+<pre><code>c2v[c][j] = 0.0  for all check nodes c, all edges j
+# No prior information from check nodes</code></pre>
+
+<h4>Variable Node Update (VNU)</h4>
+<pre><code>for each variable node v:
+    posterior[v] = channel_llr[v] + sum(c2v[c -> v] for all check nodes c connected to v)
+    for each connected check node c:
+        v2c[v -> c] = posterior[v] - c2v[c -> v]   # Extrinsic principle!</code></pre>
+
+<p>The <strong>extrinsic principle</strong> is critical: the message from v to c must NOT include information that c already sent to v. Subtracting c2v[c&rarr;v] ensures each message carries only independent evidence. Without this, the decoder would "echo" information and fail to converge.</p>
+
+<h4>Syndrome Check (Early Termination)</h4>
+<pre><code>hard_bits[v] = 1 if posterior[v] &lt; 0 else 0
+syndrome[c] = XOR of hard_bits[v] for all v connected to c
+if all syndrome[c] == 0:  # Valid codeword found!
+    return hard_bits       # Stop early — saves power and latency</code></pre>
+
+<h4>Check Node Update (CNU) — The Min-Sum Core</h4>
+<pre><code>for each check node c:
+    # Gather incoming messages
+    signs[j] = sign(v2c[j])          # +1 or -1
+    magnitudes[j] = |v2c[j]|
+
+    # XOR all signs (parity of negative messages)
+    sign_product = product(signs[j])
+
+    # Find two smallest magnitudes
+    min1, min2, argmin1 = find_two_smallest(magnitudes)
+
+    # Send outgoing messages
+    for each edge j:
+        ext_sign = sign_product * signs[j]   # Flip sign for extrinsic
+        mag = min2 if j == argmin1 else min1  # The OTHER minimum
+        c2v[c][j] = alpha * ext_sign * mag    # alpha = 0.75 normalization</code></pre>
+
+<div class="highlight">
+  <strong>Why does min-sum work?</strong> The exact BP update computes 2&middot;atanh(&prod; tanh(v2c/2)), which is dominated by the smallest magnitude input. The min-sum approximation replaces this with just the minimum magnitude, scaled by &alpha;=0.75 to compensate for the overestimation. The "min2" architecture means we only store two values per check node instead of all edge messages — critical for FPGA BRAM efficiency.
+</div>
+
+<h3>Convergence Behavior</h3>
+
+<table>
+  <tr><th>SNR</th><th>Converges?</th><th>Iterations</th><th>What's happening</th></tr>
+  <tr><td>&infin; (noiseless)</td><td><span class="tag tag-pass">YES</span></td><td>1</td><td>Channel LLRs are already correct. Single VNU+syndrome check suffices.</td></tr>
+  <tr><td>+2.0 dB</td><td><span class="tag tag-pass">YES</span></td><td>12</td><td>Strong enough signal. Decoder iteratively corrects ~50 initial bit errors.</td></tr>
+  <tr><td>0.0 dB</td><td><span class="tag tag-fail">NO</span></td><td>50 (max)</td><td>Below waterfall. Channel too noisy for this code rate.</td></tr>
+  <tr><td>-2.0 dB</td><td><span class="tag tag-fail">NO</span></td><td>50 (max)</td><td>Deep noise floor. ~22% raw BER.</td></tr>
+</table>
+
+
+<!-- ===================================================================== -->
+<!-- 4. CHANNEL MODELING -->
+<!-- ===================================================================== -->
+<h1 id="sec4">4. Channel Modeling — Why It Matters</h1>
+
+<p>The channel model determines what the receiver "sees" after the signal travels from transmitter to antenna. Getting this right is essential — a decoder tested only on AWGN will fail spectacularly on real-world multipath signals.</p>
+
+<h3>The Three Channel Models</h3>
+
+<h4>1. Flat (AWGN Only)</h4>
+<div class="card">
+  <p><strong>Impulse response:</strong> h = [1.0] (single tap, unity gain)</p>
+  <p><strong>What it models:</strong> Line-of-sight reception with no reflections. The signal arrives perfectly, just with additive white Gaussian noise.</p>
+  <p><strong>When it's realistic:</strong> Rural areas, rooftop antennas pointed at nearby transmitters. Also the theoretical baseline for comparing code performance.</p>
+  <p><strong>Effect on OFDM:</strong> All subcarriers experience identical SNR. Channel estimation is trivial. This is the "easy" case.</p>
+<pre><code>H(f) = |1.0| = 0 dB for all frequencies
+Every subcarrier sees the same channel.</code></pre>
+</div>
+
+<h4>2. Two-Tap</h4>
+<div class="card">
+  <p><strong>Impulse response:</strong> h = [1.0, 0, 0, 0, 0, 0.707] (main path + reflection at -3 dB, 5 samples delayed)</p>
+  <p><strong>What it models:</strong> A single strong reflection — e.g., a signal bouncing off a nearby building. The delayed copy creates frequency-selective fading with periodic nulls.</p>
+  <p><strong>When it's realistic:</strong> Suburban areas with one dominant reflector (building, hill).</p>
+  <p><strong>Effect on OFDM:</strong> The frequency response has a sinusoidal pattern of peaks and nulls. Subcarriers near nulls experience very low SNR, while others are boosted. The LDPC code must correct errors concentrated on the faded subcarriers.</p>
+<pre><code>H(f) = 1 + 0.707 * exp(-j*2*pi*f*5/Fs)
+|H(f)| oscillates between +4 dB and -10 dB across the band.</code></pre>
+</div>
+
+<h4>3. TU-6 (Typical Urban, 6 Taps)</h4>
+<div class="card">
+  <p><strong>Impulse response:</strong></p>
+  <table>
+    <tr><th>Tap</th><th>Delay (samples)</th><th>Power (dB)</th><th>Physical meaning</th></tr>
+    <tr><td>1</td><td>0</td><td>-3.0</td><td>Direct path (partially obstructed)</td></tr>
+    <tr><td>2</td><td>1</td><td>0.0</td><td>Ground reflection (strongest path)</td></tr>
+    <tr><td>3</td><td>3</td><td>-2.0</td><td>Nearby building reflection</td></tr>
+    <tr><td>4</td><td>5</td><td>-6.0</td><td>Distant building reflection</td></tr>
+    <tr><td>5</td><td>8</td><td>-8.0</td><td>Far scatter</td></tr>
+    <tr><td>6</td><td>12</td><td>-10.0</td><td>Diffuse multipath tail</td></tr>
+  </table>
+  <p><strong>What it models:</strong> The standard ITU Typical Urban channel. Multiple reflections from buildings, ground, and distant scatterers create a complex frequency response with deep, narrow nulls.</p>
+  <p><strong>When it's realistic:</strong> Urban DTV reception — the most common real-world scenario. The channel varies unpredictably across frequency, and some subcarriers may be completely wiped out.</p>
+  <p><strong>Effect on OFDM:</strong> Severe frequency-selective fading. Pilot-based channel estimation must accurately track the channel across all subcarriers, and the LDPC code must handle burst errors from faded spectral regions.</p>
+</div>
+
+<h3>Why Multipath Creates the Need for OFDM</h3>
+
+<p>In a single-carrier system (like ATSC 1.0's 8VSB), multipath causes <strong>inter-symbol interference (ISI)</strong> — delayed copies of previous symbols overlap with the current symbol. Fixing this requires complex adaptive equalizers.</p>
+
+<p>OFDM solves this elegantly: by splitting the wideband channel into many narrow subcarriers, each subcarrier sees an approximately flat channel. The cyclic prefix (CP) absorbs the multipath delay spread, preventing ISI between OFDM symbols. The remaining effect is per-subcarrier amplitude/phase distortion, which is corrected by simple one-tap equalization: <code>X_eq = Y / H_est</code>.</p>
+
+<div class="highlight">
+  <strong>Critical insight:</strong> The cyclic prefix must be longer than the maximum channel delay spread. Our CP = 16 samples, and the TU-6 model has maximum delay = 12 samples. Since 16 &gt; 12, the CP fully absorbs the multipath, and we get ISI-free reception. If CP were only 8 samples, the TU-6 channel would cause ISI, and performance would degrade dramatically.
+</div>
+
+
+<!-- ===================================================================== -->
+<!-- 5. CHANNEL ESTIMATION & EQUALIZATION -->
+<!-- ===================================================================== -->
+<h1 id="sec5">5. Channel Estimation &amp; Equalization</h1>
+
+<p>After OFDM demodulation (FFT), each received subcarrier is Y[k] = H[k]&middot;X[k] + W[k], where H[k] is the unknown channel at frequency k and W[k] is noise. To recover X[k], we need to estimate H[k].</p>
+
+<h3>Pilot-Based Least-Squares (LS) Estimation</h3>
+
+<p>We transmit <strong>known pilot symbols</strong> (P[k] = 1+0j) on specific subcarriers. At the receiver:</p>
+
+<pre><code># At pilot subcarrier positions (every 12th subcarrier):
+H_pilot[k] = Y_pilot[k] / P[k]    # Since P[k] = 1, this is just Y_pilot[k]
+
+# Interpolate to all data subcarriers:
+H_est[k] = interpolate(pilot_positions, H_pilot, all_positions)
+
+# Zero-forcing equalization:
+X_eq[k] = Y[k] / H_est[k]</code></pre>
+
+<h4>Pilot Configuration</h4>
+<table>
+  <tr><th>Parameter</th><th>Value</th><th>Why</th></tr>
+  <tr><td>FFT size</td><td>64</td><td>Demonstration size; real ATSC 3.0 uses 8K/16K/32K</td></tr>
+  <tr><td>Data subcarriers</td><td>48</td><td>Carries QAM symbols</td></tr>
+  <tr><td>Pilot subcarriers</td><td>4</td><td>Known reference values for channel estimation</td></tr>
+  <tr><td>Pilot spacing</td><td>Every 12th</td><td>Must satisfy Nyquist criterion for channel bandwidth</td></tr>
+  <tr><td>Pilot value</td><td>1.0 + 0j</td><td>BPSK pilot; makes LS estimation trivial (divide by 1)</td></tr>
+</table>
+
+<h3>Why LS Estimation Works (and When It Doesn't)</h3>
+
+<p><strong>Flat channel:</strong> H[k] is constant across all subcarriers. Even with only 4 pilots, the interpolation is perfect. Channel estimation adds negligible error.</p>
+
+<p><strong>Two-tap channel:</strong> H[k] has a sinusoidal variation. Linear interpolation between 4 pilots captures the trend but may miss exact null positions. Performance degrades by ~1-2 dB compared to perfect channel knowledge.</p>
+
+<p><strong>TU-6 channel:</strong> H[k] has rapid, deep variations. Four pilots spaced 12 subcarriers apart cannot capture narrow nulls (which may be only 2-3 subcarriers wide). This causes estimation error at the faded subcarriers, leading to noise enhancement during equalization (dividing by a small estimated H amplifies noise). This is why TU-6 performance requires significantly higher SNR.</p>
+
+<div class="highlight">
+  <strong>Future improvement:</strong> ATSC 3.0 uses many more pilots (scattered + continual) and MMSE estimation with noise regularization. Our simplified LS estimator demonstrates the concept; a production receiver would use <code>H_mmse = H_ls * SNR / (SNR + 1)</code> to avoid noise amplification at faded subcarriers.
+</div>
+
+<h3>Zero-Forcing Equalization</h3>
+<p>After estimating H[k], we equalize: X_eq[k] = Y[k] / H_est[k]. This is "zero-forcing" because it forces inter-carrier interference to zero. The cost: noise enhancement at frequencies where |H_est[k]| is small. A better approach (MMSE equalization) would be: <code>X_eq = H* / (|H|^2 + 1/SNR) * Y</code>, trading some residual interference for reduced noise amplification.</p>
+
+
+<!-- ===================================================================== -->
+<!-- 6. OFDM SIGNAL CHAIN -->
+<!-- ===================================================================== -->
+<h1 id="sec6">6. OFDM Signal Chain</h1>
+
+<h3>Transmitter Path</h3>
+<div class="diagram"><pre>
+Info bits [324]
+    |
+    v
+LDPC Encode: H_parity_inv @ (H_info @ info) mod 2
+    |
+    v
+Coded bits [648]
+    |
+    v
+QAM Map: groups of 2/4/6 bits -> complex symbols
+    |                  QPSK: 324 symbols
+    v                  16QAM: 162 symbols
+QAM symbols            64QAM: 108 symbols
+    |
+    v
+OFDM Frame: insert pilots, assign to subcarriers
+    |
+    v
+IFFT (64-point): frequency domain -> time domain
+    |
+    v
+Add Cyclic Prefix: prepend last 16 samples
+    |
+    v
+TX IQ samples (complex baseband)
+</pre></div>
+
+<h3>Receiver Path</h3>
+<div class="diagram"><pre>
+RX IQ samples (complex, noisy, distorted)
+    |
+    v
+Remove Cyclic Prefix: strip first 16 samples per symbol
+    |
+    v
+FFT (64-point): time domain -> frequency domain
+    |
+    v
+Extract Pilots: Y_pilot at known positions
+    |
+    v
+LS Channel Estimation: H_est[k] = Y_pilot / P_pilot
+    |
+    v
+Interpolate H_est to all subcarriers
+    |
+    v
+Zero-Forcing EQ: X_eq[k] = Y_data[k] / H_est[k]
+    |
+    v
+Soft QAM Demap: X_eq -> LLR values
+    |                  QPSK: LLR = 2*sqrt(2)/sigma^2 * Re/Im
+    v                  16/64QAM: max-log-MAP approximation
+LLR [648 values]
+    |
+    v
+LDPC Decode: NMS, alpha=0.75, up to 50 iterations
+    |
+    v
+Decoded bits [648] -> info bits [324]
+</pre></div>
+
+
+<!-- ===================================================================== -->
+<!-- 7. TEST DATA GENERATION -->
+<!-- ===================================================================== -->
+<h1 id="sec7">7. Test Data Generation &amp; Validation</h1>
+
+<h3>The Test Vector Contract</h3>
+<p>Test vectors are the <strong>single source of truth</strong> shared across all three implementations. Python generates them; Rust and FPGA must produce bit-identical output for the same input.</p>
+
+<table>
+  <tr><th>SNR Point</th><th>Label</th><th>Purpose</th><th>Converges?</th><th>Bit Errors</th></tr>
+  <tr><td>&infin;</td><td>noiseless</td><td>Basic sanity — does the decoder work at all?</td><td><span class="tag tag-pass">YES (1 iter)</span></td><td>0/648</td></tr>
+  <tr><td>+2.0 dB</td><td>clean</td><td>Early termination path — converges quickly</td><td><span class="tag tag-pass">YES (12 iter)</span></td><td>0/648</td></tr>
+  <tr><td>-0.5 dB</td><td>waterfall</td><td>Waterfall region — decoder struggles</td><td><span class="tag tag-fail">NO (50 iter)</span></td><td>112/648</td></tr>
+  <tr><td>-2.0 dB</td><td>high_noise</td><td>Deep noise — max_iter path exercised</td><td><span class="tag tag-fail">NO (50 iter)</span></td><td>146/648</td></tr>
+</table>
+
+<h3>What the Test Data Looks Like</h3>
+
+<h4>f32 LLR Values (channel input to decoder)</h4>
+<p>At +2.0 dB SNR, a typical LLR vector has:</p>
+<ul>
+  <li>Mean |LLR| &approx; 3.5 (moderate confidence)</li>
+  <li>Most LLRs have correct sign (matching transmitted bit)</li>
+  <li>A few LLRs have wrong sign (noise flipped them) — these are the errors the LDPC code must correct</li>
+</ul>
+
+<h4>6-bit Quantized LLR (FPGA input)</h4>
+<p>The f32 values are quantized to 6-bit signed integers [-31, +31] using 2's complement. This is the FPGA's native datapath width. The quantization adds &lt; 0.1 dB loss vs floating-point — well characterized in the literature.</p>
+
+<h4>Per-Iteration Messages</h4>
+<p>For the clean (+2 dB) case, we store 12 iteration snapshots. Each contains:</p>
+<ul>
+  <li><code>c2v_iterNN.hex</code>: 324 lines, each line has space-separated hex values for each edge out of that check node</li>
+  <li><code>v2c_iterNN.hex</code>: 648 lines, each line has hex values for edges out of that variable node</li>
+  <li><code>posterior_iterNN.hex</code>: 648 hex values (6-bit quantized posterior LLR)</li>
+  <li><code>syndrome_iterNN.txt</code>: "PASS" or "FAIL"</li>
+</ul>
+
+<h3>Why This Test Data Mimics Real-World Scenarios</h3>
+
+<div class="card">
+  <h4>Noiseless (&infin; dB) — Manufacturing Test</h4>
+  <p>In real systems, this is the equivalent of a "loopback test" where the transmitter output is connected directly to the receiver input. It validates that the digital signal processing chain works without any analog impairments. Every hardware LDPC decoder must pass this test before deployment.</p>
+</div>
+
+<div class="card">
+  <h4>Clean (+2 dB) — Strong Local Signal</h4>
+  <p>This represents receiving a TV station within 10-20 miles with a decent antenna. The signal has some noise but the LDPC code handles it easily. In real ATSC 3.0, this corresponds to the "core service area" where broadcast reliability is designed to be &gt;99%.</p>
+</div>
+
+<div class="card">
+  <h4>Waterfall (-0.5 dB) — Fringe Reception</h4>
+  <p>This is the boundary of reliable reception — the "cliff edge" where LDPC either saves you or doesn't. In real DTV, this is 40-60 miles from the transmitter. The BER is highly variable frame-to-frame, and a real receiver would switch to a more robust code rate.</p>
+</div>
+
+<div class="card">
+  <h4>High Noise (-2 dB) — Beyond Coverage</h4>
+  <p>Below the waterfall. No amount of LDPC decoding can recover the data at this code rate. In real systems, this triggers an "outage" condition. The test validates that the decoder doesn't crash, hang, or produce garbage — it should exit gracefully after max_iter.</p>
+</div>
+
+<h3>The f32 Precision Requirement</h3>
+<p>A critical discovery during testing: Python uses f64 (double precision) internally, but test vectors are stored as f32 (single precision). When Rust reads the f32 files and decodes, the accumulated rounding difference over 50 iterations can flip marginal bits differently than Python's f64 decode of the original f64 LLR.</p>
+
+<p><strong>Solution:</strong> Python now quantizes LLR through f32 before decoding: <code>llr_f32 = llr.astype(np.float32).astype(np.float64)</code>. This ensures both implementations decode from bit-identical f32 input, and produce bit-identical output. This matches the real-world scenario where ADC/DAC precision limits LLR to fixed-point anyway.</p>
+
+
+<!-- ===================================================================== -->
+<!-- 8. BER PERFORMANCE -->
+<!-- ===================================================================== -->
+<h1 id="sec8">8. BER Performance — All Modulations &amp; Channels</h1>
+
+<h3>BPSK Baseline (Flat AWGN, direct channel.py)</h3>
+<p>This is the original LDPC-only test without OFDM, using the simplified BPSK+AWGN channel model.</p>
+
+<table>
+  <tr><th>SNR (dB)</th><th>BER</th><th>FER</th><th>Avg Iter</th><th>Status</th></tr>
+  <tr><td>-3.0</td><td>2.61e-01</td><td>1.000</td><td>50.0</td><td><span class="tag tag-fail">Noise floor</span></td></tr>
+  <tr><td>-2.0</td><td>2.33e-01</td><td>1.000</td><td>50.0</td><td><span class="tag tag-fail">Noise floor</span></td></tr>
+  <tr><td>-1.0</td><td>2.01e-01</td><td>1.000</td><td>50.0</td><td><span class="tag tag-fail">Noise floor</span></td></tr>
+  <tr><td>0.0</td><td>1.50e-01</td><td>0.970</td><td>49.4</td><td><span class="tag tag-fail">Waterfall start</span></td></tr>
+  <tr><td>0.5</td><td>1.07e-01</td><td>0.870</td><td>47.2</td><td><span class="tag tag-fail">Waterfall</span></td></tr>
+  <tr><td>1.0</td><td>4.01e-02</td><td>0.440</td><td>36.1</td><td>Waterfall knee</td></tr>
+  <tr><td>1.5</td><td>1.23e-02</td><td>0.170</td><td>20.8</td><td>Steep drop</td></tr>
+  <tr><td>2.0</td><td>3.09e-05</td><td>0.010</td><td>11.0</td><td><span class="tag tag-pass">Near error-free</span></td></tr>
+  <tr><td>2.5</td><td>0.00e+00</td><td>0.000</td><td>7.9</td><td><span class="tag tag-pass">Error-free</span></td></tr>
+  <tr><td>3.0</td><td>0.00e+00</td><td>0.000</td><td>6.5</td><td><span class="tag tag-pass">Error-free</span></td></tr>
+</table>
+
+<h3>OFDM + LDPC (QPSK, Flat Channel)</h3>
+<p>Adding the OFDM layer (QAM mapping, IFFT/FFT, pilots, equalization) shifts the waterfall right by ~2 dB due to pilot overhead and equalization imperfections.</p>
+
+<table>
+  <tr><th>SNR (dB)</th><th>BER (coded)</th><th>BER (uncoded)</th><th>Avg Iter</th><th>LDPC Gain</th></tr>
+  <tr><td>-2.0</td><td>3.06e-01</td><td>4.72e-01</td><td>50</td><td>+0.35 (marginal)</td></tr>
+  <tr><td>0.0</td><td>2.01e-01</td><td>1.70e-01</td><td>50</td><td>Noise too strong</td></tr>
+  <tr><td>2.0</td><td>9.88e-02</td><td>1.02e-01</td><td>50</td><td>Waterfall region</td></tr>
+  <tr><td>4.0</td><td>0.00e+00</td><td>5.25e-02</td><td>7</td><td><strong>Full correction</strong></td></tr>
+  <tr><td>6.0</td><td>0.00e+00</td><td>2.16e-02</td><td>4</td><td>Fast convergence</td></tr>
+  <tr><td>8.0</td><td>0.00e+00</td><td>8.95e-03</td><td>3</td><td>Near-trivial</td></tr>
+  <tr><td>10.0</td><td>0.00e+00</td><td>3.09e-03</td><td>2</td><td>Almost noiseless</td></tr>
+</table>
+
+<div class="highlight">
+  <strong>Reading the table:</strong> At SNR = 4 dB, the uncoded BER is 5.25% (1 in 20 bits wrong), but after LDPC decoding the BER drops to exactly 0. The code corrected ~17 bit errors in a single 324-bit block. This is the LDPC "coding gain" — approximately 4 dB of effective SNR improvement.
+</div>
+
+<h3>Impact of Channel Model</h3>
+<p>The same QPSK+LDPC system degrades significantly under multipath:</p>
+
+<table>
+  <tr><th>Channel</th><th>SNR for BER=0</th><th>SNR Penalty vs Flat</th><th>Why</th></tr>
+  <tr><td>Flat (AWGN)</td><td>~4 dB</td><td>Baseline</td><td>Perfect channel estimation</td></tr>
+  <tr><td>Two-Tap</td><td>~8-10 dB</td><td>+4-6 dB</td><td>Frequency nulls cause burst errors</td></tr>
+  <tr><td>TU-6</td><td>&gt;15 dB</td><td>&gt;+11 dB</td><td>Deep fades + poor pilot interpolation</td></tr>
+</table>
+
+<p>The TU-6 penalty is dominated by channel estimation error (not decoder weakness). With perfect channel knowledge, TU-6 would only cost ~2-3 dB over flat. The remaining ~8 dB is the price of estimating the channel from only 4 pilots. This is why ATSC 3.0 uses hundreds of pilots per OFDM symbol.</p>
+
+<h3>Impact of Modulation Order</h3>
+<p>Higher-order modulation packs more bits per symbol but requires higher SNR:</p>
+
+<table>
+  <tr><th>Modulation</th><th>Bits/Symbol</th><th>Spectral Efficiency</th><th>SNR for BER=0 (flat)</th><th>Decoder Load</th></tr>
+  <tr><td>QPSK</td><td>2</td><td>1.0 bit/s/Hz</td><td>~4 dB</td><td>324 symbols, 7 OFDM symbols</td></tr>
+  <tr><td>16-QAM</td><td>4</td><td>2.0 bit/s/Hz</td><td>~8-10 dB</td><td>162 symbols, 4 OFDM symbols</td></tr>
+  <tr><td>64-QAM</td><td>6</td><td>3.0 bit/s/Hz</td><td>~12-14 dB</td><td>108 symbols, 3 OFDM symbols</td></tr>
+</table>
+
+
+<!-- ===================================================================== -->
+<!-- 9. CROSS-IMPLEMENTATION COMPARISON -->
+<!-- ===================================================================== -->
+<h1 id="sec9">9. Cross-Implementation Comparison: Python vs Rust vs FPGA</h1>
+
+<h3>Implementation Overview</h3>
+<div class="compare-grid">
+  <div class="compare-card">
+    <h4><span class="tag tag-python">Python</span> Reference</h4>
+    <p><strong>6 modules</strong>, ~1,200 lines</p>
+    <p>ldpc_code.py, encoder.py, channel.py, decoder.py, test_ber.py, gen_test_vectors.py</p>
+    <p>Plus ofdm/ package (6 modules) and dashboard</p>
+    <p><strong>Purpose:</strong> Correctness oracle, test vector generation</p>
+    <p><strong>Speed:</strong> ~50 ms/frame (50 iter)</p>
+  </div>
+  <div class="compare-card">
+    <h4><span class="tag tag-rust">Rust</span> SIMD</h4>
+    <p><strong>4 source files</strong>, ~800 lines</p>
+    <p>code.rs, decoder.rs, simd.rs, main.rs</p>
+    <p>Plus bench and CLI crates</p>
+    <p><strong>Purpose:</strong> Production-speed software decoder</p>
+    <p><strong>Speed:</strong> ~1.7 ms/frame (50 iter) — <strong>30x faster</strong></p>
+  </div>
+  <div class="compare-card">
+    <h4><span class="tag tag-fpga">FPGA</span> RTL</h4>
+    <p><strong>12 SV modules</strong>, 1,771 lines</p>
+    <p>5 testbenches, 1,282 lines</p>
+    <p>Makefile + sim scripts</p>
+    <p><strong>Purpose:</strong> Real-time hardware decoder</p>
+    <p><strong>Target:</strong> ~50 &mu;s/frame at 360 MHz</p>
+  </div>
+</div>
+
+<h3>Algorithm Comparison</h3>
+
+<table>
+  <tr><th>Aspect</th><th><span class="tag tag-python">Python</span></th><th><span class="tag tag-rust">Rust</span></th><th><span class="tag tag-fpga">FPGA</span></th></tr>
+  <tr><td>Precision</td><td>float64</td><td>float64 (f32 SIMD available)</td><td>6-bit fixed-point</td></tr>
+  <tr><td>Schedule</td><td>Flooding</td><td>Flooding</td><td>Flooding (layered planned)</td></tr>
+  <tr><td>CNU</td><td>np.argsort + loop</td><td>Linear scan (scalar or AVX2)</td><td>Pipelined comparator tree</td></tr>
+  <tr><td>VNU</td><td>Python loop per node</td><td>CSR indexed flat array</td><td>Saturating adder array</td></tr>
+  <tr><td>Message storage</td><td>list[np.ndarray]</td><td>Vec&lt;f64&gt; flat</td><td>BRAM (min2 compressed)</td></tr>
+  <tr><td>Alpha multiply</td><td><code>alpha * x</code></td><td><code>alpha * x</code></td><td><code>x - (x &gt;&gt;&gt; 2)</code></td></tr>
+  <tr><td>Early termination</td><td>Yes (syndrome XOR)</td><td>Yes (syndrome XOR)</td><td>Yes (syndrome checker module)</td></tr>
+  <tr><td>Bit-exact with Python?</td><td>Reference</td><td><span class="tag tag-pass">YES</span> (all 4 SNR points)</td><td>Pending (6-bit quantization differs)</td></tr>
+</table>
+
+<h3>Performance Comparison</h3>
+
+<table>
+  <tr><th>Metric</th><th><span class="tag tag-python">Python</span></th><th><span class="tag tag-rust">Rust</span></th><th><span class="tag tag-fpga">FPGA</span> (projected)</th></tr>
+  <tr><td>Frame time (clean, 12 iter)</td><td>~12 ms</td><td>424 &mu;s</td><td>~15 &mu;s</td></tr>
+  <tr><td>Frame time (max, 50 iter)</td><td>~50 ms</td><td>1.74 ms</td><td>~50 &mu;s</td></tr>
+  <tr><td>Throughput</td><td>~13 kbit/s</td><td>~370 kbit/s</td><td>~13 Mbit/s</td></tr>
+  <tr><td>Speedup vs Python</td><td>1x</td><td>30x</td><td>~1000x</td></tr>
+  <tr><td>Power consumption</td><td>~15W (CPU)</td><td>~5W (one core)</td><td>~0.5W (Artix-7)</td></tr>
+  <tr><td>Latency</td><td>N/A</td><td>~2 ms</td><td>~50 &mu;s</td></tr>
+</table>
+
+<h3>Test Results Summary</h3>
+
+<table>
+  <tr><th>Test Suite</th><th>Tests</th><th>Pass</th><th>Fail</th></tr>
+  <tr><td><span class="tag tag-python">Python</span> P1-P6 subsystem tests</td><td>20</td><td>20</td><td>0</td></tr>
+  <tr><td><span class="tag tag-rust">Rust</span> unit tests (cargo test)</td><td>11</td><td>11</td><td>0</td></tr>
+  <tr><td><span class="tag tag-rust">Rust</span> test vector validation</td><td>4</td><td>4</td><td>0</td></tr>
+  <tr><td><span class="tag tag-fpga">FPGA</span> testbenches</td><td>5</td><td colspan="2">Awaiting Icarus Verilog</td></tr>
+</table>
+
+
+<!-- ===================================================================== -->
+<!-- 10. TECHNICAL TRADEOFFS -->
+<!-- ===================================================================== -->
+<h1 id="sec10">10. Technical Tradeoffs &amp; Design Decisions</h1>
+
+<h3>Decision 1: Normalized Min-Sum vs Belief Propagation</h3>
+<div class="card">
+  <p><strong>Chose:</strong> NMS with &alpha;=0.75</p>
+  <p><strong>Gave up:</strong> ~0.2 dB coding gain</p>
+  <p><strong>Gained:</strong> 10x simpler hardware (no LUTs for tanh/atanh), zero DSP slices for alpha (bit shift), identical algorithm across all 3 implementations, well-understood fixed-point behavior</p>
+  <p><strong>Verdict:</strong> Universal choice in commercial LDPC decoders. The 0.2 dB is recovered by adding ~0.5 extra iterations on average.</p>
+</div>
+
+<h3>Decision 2: Flooding vs Layered Decoding</h3>
+<div class="card">
+  <p><strong>Chose:</strong> Flooding for Python/Rust (simplicity), layered planned for FPGA (throughput)</p>
+  <p><strong>Tradeoff:</strong> Layered decoding converges in ~half the iterations (immediate belief updates propagate faster), doubling effective throughput. But it requires read-modify-write of variable beliefs (more complex memory access pattern) and is harder to verify against a flooding reference.</p>
+  <p><strong>Plan:</strong> Validate the flooding FPGA first (bit-exact with Python). Then add layered mode and verify it converges to the same codeword (possibly in fewer iterations).</p>
+</div>
+
+<h3>Decision 3: f64 Internal Precision in Rust</h3>
+<div class="card">
+  <p><strong>Chose:</strong> f64 internal arithmetic with f32 input</p>
+  <p><strong>Gave up:</strong> ~2x slower than pure f32 (wider registers, less SIMD parallelism)</p>
+  <p><strong>Gained:</strong> Bit-exact match with Python for all 4 test vectors, including non-converging cases where 50 iterations of accumulated rounding would diverge</p>
+  <p><strong>The f32 SIMD path exists</strong> for high-throughput mode where bit-exact Python match isn't required (e.g., real-time BER sweeps).</p>
+</div>
+
+<h3>Decision 4: 802.11n Mock Code vs Full ATSC 3.0</h3>
+<div class="card">
+  <p><strong>Chose:</strong> IEEE 802.11n rate-1/2 N=648 Z=27 as the development code</p>
+  <p><strong>Why not ATSC 3.0 directly?</strong> Full ATSC 3.0 codes are N=64,800, Z=360. GF(2) encoder inverse is infeasible (M=56,160). Python decoder takes ~30 seconds per frame. FPGA barrel shifter needs 360-wide muxes. Everything is 100x harder to debug.</p>
+  <p><strong>Path to ATSC 3.0:</strong> The code is parameterized. Changing the base matrix and Z scales everything. The 802.11n code validates the algorithm; the ATSC 3.0 code validates the parameters.</p>
+</div>
+
+<h3>Decision 5: Min2 Architecture for FPGA</h3>
+<div class="card">
+  <p><strong>Chose:</strong> Store (min1, min2, argmin1, sign_product, signs) per check node instead of all edge messages</p>
+  <p><strong>Saved:</strong> ~60% BRAM. Full edge storage for N=648: 6 bits &times; 2,376 edges &approx; 1.8 KB. For N=64,800: 6 bits &times; ~200K edges &approx; 150 KB (exceeds Artix-7 BRAM).</p>
+  <p><strong>Min2 cost:</strong> ~40 bits per check node &times; 324 check nodes &approx; 1.6 KB. Scales to full ATSC 3.0 at ~5 KB.</p>
+  <p><strong>Tradeoff:</strong> The CNU must process column blocks sequentially (accumulating min/sign) rather than accessing all edges in parallel. This adds latency but is the standard approach in all area-constrained LDPC decoder ASICs.</p>
+</div>
+
+<h3>Decision 6: LS vs MMSE Channel Estimation</h3>
+<div class="card">
+  <p><strong>Chose:</strong> Least-Squares (LS) with linear interpolation</p>
+  <p><strong>Simplicity:</strong> H_est = Y_pilot / P_pilot. One complex division per pilot. No matrix inversion, no noise variance estimation required.</p>
+  <p><strong>Cost:</strong> ~3-5 dB worse than MMSE on multipath channels (noise amplification at faded subcarriers)</p>
+  <p><strong>Why acceptable:</strong> This is a simulation framework for validating the LDPC decoder, not a production ATSC 3.0 receiver. The channel estimation quality shows clearly in the dashboard (compare True vs Estimated H(f) plot). Upgrading to MMSE is a straightforward improvement once the decoder is proven.</p>
+</div>
+
+<!-- ===================================================================== -->
+<!-- FOOTER -->
+<!-- ===================================================================== -->
+<hr style="border-color: var(--border); margin: 40px 0 20px;">
+<p style="text-align: center; color: var(--overlay); font-size: 0.85em;">
+  ATSC 3.0 LDPC Decoder Project &middot;
+  <a href="https://github.com/powderhound100/Ofdm-tv">github.com/powderhound100/Ofdm-tv</a> &middot;
+  Python 3.12 + Rust (stable) + SystemVerilog &middot;
+  Report generated March 2026
+</p>
+
+</body>
+</html>
