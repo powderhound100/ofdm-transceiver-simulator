@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Rust
+rust/target/
+**/*.rs.bk
+
+# FPGA
+fpga/sim/*.vvp
+fpga/sim/*.vcd
+fpga/sim/*.fst
+fpga/sim/obj_dir/
+fpga/synth/*.bit
+fpga/synth/*.dcp
+fpga/synth/.Xil/
+*.jou
+*.log
+
+# Test vectors (generated, can be large)
+test_vectors/*.bin
+test_vectors/*.hex
+test_vectors/*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
