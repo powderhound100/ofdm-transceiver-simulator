@@ -88,6 +88,8 @@
   <a href="#sec8">8. BER Performance — All Modulations &amp; Channels</a>
   <a href="#sec9">9. Cross-Implementation Comparison: Python vs Rust vs FPGA</a>
   <a href="#sec10">10. Technical Tradeoffs &amp; Design Decisions</a>
+  <a href="#sec11">11. Hardware &amp; SDR Roadmap</a>
+  <a href="#sec12">12. References &amp; Open-Source Validation</a>
 </div>
 
 <!-- ===================================================================== -->
@@ -764,6 +766,200 @@ Decoded bits [648] -> info bits [324]
 </div>
 
 <!-- ===================================================================== -->
+<!-- 11. HARDWARE & SDR ROADMAP -->
+<!-- ===================================================================== -->
+<h1 id="sec11">11. Hardware &amp; SDR Roadmap</h1>
+
+<h2>ATSC 3.0 RF Specifications</h2>
+<table>
+  <tr><th>Parameter</th><th>Value</th></tr>
+  <tr><td>Frequency band</td><td>UHF 470–698 MHz (US channels 14–51)</td></tr>
+  <tr><td>Channel bandwidth</td><td>6 MHz (North America)</td></tr>
+  <tr><td>FFT sizes</td><td>8K, 16K, 32K</td></tr>
+  <tr><td>Modulation</td><td>QPSK, 16QAM, 64QAM, 256QAM, 1024QAM, 4096QAM</td></tr>
+  <tr><td>LDPC code lengths</td><td>16,200 (short) and 64,800 (normal)</td></tr>
+  <tr><td>LDPC code rates</td><td>2/15 to 13/15 (12 rates)</td></tr>
+  <tr><td>Peak-to-Average Power Ratio</td><td>~10–12 dB (typical for OFDM)</td></tr>
+</table>
+
+<h2>SDR Hardware Comparison</h2>
+<table>
+  <tr><th>SDR</th><th>Freq Range</th><th>Max BW</th><th>ADC Bits</th><th>Price</th><th>Verdict</th></tr>
+  <tr><td>RTL-SDR v4</td><td>24–1766 MHz</td><td>2.4 MHz</td><td>8</td><td>~$30</td><td>Too narrow (need 6 MHz). Good for FM/ADS-B but not ATSC 3.0</td></tr>
+  <tr style="background:rgba(166,227,161,0.08)"><td><strong>SDRplay RSP1B</strong></td><td>1 kHz–2 GHz</td><td>10 MHz</td><td>14</td><td>~$120</td><td><strong>Recommended.</strong> Covers full 6 MHz with margin. 14-bit gives the dynamic range OFDM needs. SoapySDR + GNU Radio compatible</td></tr>
+  <tr><td>HackRF One</td><td>1–6000 MHz</td><td>20 MHz</td><td>8</td><td>~$350</td><td>Sufficient BW but 8-bit ADC limits SNR to ~48 dB. Usable but not ideal for high-order QAM</td></tr>
+  <tr><td>Adalm-Pluto</td><td>325–3800 MHz</td><td>20 MHz</td><td>12</td><td>~$200</td><td>Good all-around but 325 MHz low cutoff is marginal for low UHF channels</td></tr>
+  <tr><td>Ettus USRP B200</td><td>70–6000 MHz</td><td>56 MHz</td><td>12</td><td>~$1500</td><td>Overkill for single-channel. Justified for multi-channel or wideband capture</td></tr>
+</table>
+
+<div class="highlight">
+  <strong>Recommendation: SDRplay RSP1B (~$120).</strong> 14-bit ADC handles OFDM's 10–12 dB PAPR without clipping. 10 MHz BW captures the full 6 MHz channel + guard bands. Well-supported via SoapySDR, GNU Radio source block, and Python bindings.
+</div>
+
+<h2>Antenna Requirements</h2>
+<table>
+  <tr><th>Tier</th><th>Antenna</th><th>Gain</th><th>Notes</th></tr>
+  <tr><td>Basic</td><td>Telescoping whip / rabbit ears</td><td>~0 dBi</td><td>Works within 10–20 miles of transmitter</td></tr>
+  <tr><td>Better</td><td>UHF loop or bowtie (e.g., ClearStream 1MAX)</td><td>~4–6 dBi</td><td>Good for indoor/attic use, 20–40 miles</td></tr>
+  <tr><td>Best</td><td>Log-periodic or Yagi (e.g., Antennas Direct 91XG)</td><td>~10–15 dBi</td><td>Outdoor, pointed at transmitter, 40–60+ miles</td></tr>
+</table>
+<p><strong>Connection:</strong> Most SDRs use SMA connectors. TV antennas use 75-ohm F connectors. You need an <strong>F-to-SMA adapter</strong> (~$5). The impedance mismatch (75 vs 50 ohm) causes ~0.2 dB loss — negligible.</p>
+
+<h2>Signal Levels</h2>
+<table>
+  <tr><th>Scenario</th><th>Received Power at Antenna</th></tr>
+  <tr><td>Strong local (&lt;10 miles)</td><td>-30 to -40 dBm</td></tr>
+  <tr><td>Medium (10–30 miles)</td><td>-40 to -60 dBm</td></tr>
+  <tr><td>Weak (30–60 miles)</td><td>-60 to -80 dBm</td></tr>
+  <tr><td>ATSC 3.0 minimum for reliable decode</td><td>~-85 dBm (depends on code rate)</td></tr>
+  <tr><td>SDRplay RSP1B sensitivity at 500 MHz</td><td>~-110 dBm (15 dB margin)</td></tr>
+</table>
+
+<h2>Software Stack</h2>
+<table>
+  <tr><th>Layer</th><th>Tool</th><th>Purpose</th></tr>
+  <tr><td>Capture</td><td>SoapySDR + Python bindings</td><td>Raw IQ sample capture</td></tr>
+  <tr><td>Signal processing</td><td>NumPy + SciPy</td><td>FFT, filtering, channel estimation</td></tr>
+  <tr><td>OFDM demod</td><td><code>python/ofdm/</code> (this project)</td><td>CP removal, FFT, equalization</td></tr>
+  <tr><td>LDPC decode</td><td><code>python/decoder.py</code> (this project)</td><td>Soft-decision decoding</td></tr>
+  <tr><td>Visualization</td><td>Plotly Dash dashboard</td><td>Real-time IQ/spectrum/constellation plots</td></tr>
+  <tr><td>Integration</td><td>GNU Radio + gr-atsc3</td><td>Full protocol stack (future)</td></tr>
+</table>
+
+<h2>Simulation-to-Real-RF Roadmap</h2>
+
+<div class="card">
+  <h4>Stage 0: Baseband BPSK + AWGN <span class="tag tag-pass">DONE</span></h4>
+  <p><strong>Input:</strong> Synthetic bits &nbsp;|&nbsp; <strong>Channel:</strong> Flat AWGN via <code>channel.py</code> &nbsp;|&nbsp; <strong>Output:</strong> LDPC decoded bits</p>
+  <p>BER waterfall verified. Python + Rust + FPGA RTL all complete.</p>
+</div>
+
+<div class="card">
+  <h4>Stage 1: OFDM + Flat AWGN <span class="tag tag-pass">DONE</span></h4>
+  <p><strong>Processing:</strong> QAM mapping, OFDM IFFT+CP, flat AWGN, FFT, equalization, LLR</p>
+  <p>Validates: OFDM modulator/demodulator, QAM soft demapping, pilot-based channel estimation on flat channel.</p>
+</div>
+
+<div class="card">
+  <h4>Stage 2: OFDM + Multipath Fading</h4>
+  <p><strong>Channel:</strong> TDL multipath models (TU-6, frequency-selective fading)</p>
+  <p>Validates: Equalization under frequency-selective channels, pilot interpolation quality.</p>
+</div>
+
+<div class="card">
+  <h4>Stage 3: Recorded IQ File Playback</h4>
+  <p><strong>Input:</strong> Pre-recorded <code>.raw</code> or <code>.cf32</code> IQ files from real ATSC 3.0 broadcasts</p>
+  <p>Validates: Real-world signal handling, timing sync, frequency offset estimation. Use <code>rtl_sdr</code> or <code>SoapySDRUtil</code> to capture files.</p>
+</div>
+
+<div class="card">
+  <h4>Stage 4: Live SDR Capture</h4>
+  <p><strong>Input:</strong> Real-time IQ from SDRplay RSP1B</p>
+  <p>Validates: End-to-end real-time receive pipeline. Requires SDR hardware + antenna + local ATSC 3.0 broadcast.</p>
+</div>
+
+<div class="card">
+  <h4>Stage 5: GNU Radio Integration (Future)</h4>
+  <p><strong>Input:</strong> GNU Radio flowgraph with <code>gr-atsc3</code> blocks. <strong>Output:</strong> Decoded transport stream.</p>
+  <p><strong>Our contribution:</strong> LDPC decoder as a GNU Radio out-of-tree (OOT) module, callable from gr-atsc3 flowgraph.</p>
+</div>
+
+<h2>Cost Summary</h2>
+<table>
+  <tr><th>Item</th><th>Price</th></tr>
+  <tr><td>SDRplay RSP1B</td><td>~$120</td></tr>
+  <tr><td>F-to-SMA adapter</td><td>~$5</td></tr>
+  <tr><td>Basic UHF antenna</td><td>~$20–40</td></tr>
+  <tr><td><strong>Total minimum</strong></td><td><strong>~$145–165</strong></td></tr>
+</table>
+<p>Optional: outdoor antenna with mount ($50–100), coax cable run ($20–40), LNA/preamp for weak signals ($30–50).</p>
+
+
+<!-- ===================================================================== -->
+<!-- 12. REFERENCES -->
+<!-- ===================================================================== -->
+<h1 id="sec12">12. References &amp; Open-Source Validation</h1>
+
+<p>No open-source ATSC 3.0 LDPC decoder (software or RTL) currently exists — this project would be the first. The following open-source projects are used for validation and architectural reference.</p>
+
+<h2>Priority 1: gr-atsc3 — ATSC 3.0 Base Matrices</h2>
+<div class="card">
+  <p><strong>Repo:</strong> <a href="https://github.com/drmpeg/gr-atsc3">github.com/drmpeg/gr-atsc3</a> &nbsp;|&nbsp; <strong>Author:</strong> Ron Economos (drmpeg) &nbsp;|&nbsp; <strong>License:</strong> GPL-3.0</p>
+  <p>Verified against the official ATSC 3.0 V&amp;V test suite. Contains the complete A/322 LDPC parity accumulator tables for all 24 codes (12 rates &times; 2 frame lengths) in <code>lib/ldpc_bb_impl.cc</code>, plus code parameters in <code>lib/params.cc</code>.</p>
+  <p><strong>How we use it:</strong> Extract tables into our <code>ldpc_code.py</code> format; validate our encoder output; use V&amp;V test flowgraphs as additional verification beyond BER tests.</p>
+</div>
+
+<h3>ATSC 3.0 LDPC Code Types</h3>
+<table>
+  <tr><th>Type</th><th>Rates</th><th>Structure</th><th>Encoding</th></tr>
+  <tr><td><strong>Type B (IRA)</strong></td><td>6/15, 8/15–13/15</td><td>Single accumulator, parameter q</td><td>XOR info bits per LUT row, then accumulate p[j] ^= p[j-1]</td></tr>
+  <tr><td><strong>Type A (MET)</strong></td><td>2/15–5/15, 7/15</td><td>Dual accumulator, parameters q1, q2, m1, m2</td><td>Two-phase: first m1 parity bits with q1, then m2 parity bits with q2</td></tr>
+</table>
+
+<h3>Normal Frame Parameters (N=64800)</h3>
+<table>
+  <tr><th>Rate</th><th>kbch</th><th>nbch</th><th>Type</th><th>q/q1</th><th>q2</th><th>m1</th><th>m2</th></tr>
+  <tr><td>2/15</td><td>8,448</td><td>8,640</td><td>A</td><td>5</td><td>151</td><td>1,800</td><td>54,360</td></tr>
+  <tr><td>3/15</td><td>12,768</td><td>12,960</td><td>A</td><td>5</td><td>139</td><td>1,800</td><td>50,040</td></tr>
+  <tr><td>4/15</td><td>17,088</td><td>17,280</td><td>A</td><td>5</td><td>127</td><td>1,800</td><td>45,720</td></tr>
+  <tr><td>5/15</td><td>21,408</td><td>21,600</td><td>A</td><td>4</td><td>116</td><td>1,440</td><td>41,760</td></tr>
+  <tr><td>6/15</td><td>25,728</td><td>25,920</td><td>B</td><td>108</td><td>—</td><td>—</td><td>—</td></tr>
+  <tr><td>7/15</td><td>30,048</td><td>30,240</td><td>A</td><td>3</td><td>93</td><td>1,080</td><td>33,480</td></tr>
+  <tr><td>8/15</td><td>34,368</td><td>34,560</td><td>B</td><td>84</td><td>—</td><td>—</td><td>—</td></tr>
+  <tr><td>9/15</td><td>38,688</td><td>38,880</td><td>B</td><td>72</td><td>—</td><td>—</td><td>—</td></tr>
+  <tr><td>10/15</td><td>43,008</td><td>43,200</td><td>B</td><td>60</td><td>—</td><td>—</td><td>—</td></tr>
+  <tr><td>11/15</td><td>47,328</td><td>47,520</td><td>B</td><td>48</td><td>—</td><td>—</td><td>—</td></tr>
+  <tr><td>12/15</td><td>51,648</td><td>51,840</td><td>B</td><td>36</td><td>—</td><td>—</td><td>—</td></tr>
+  <tr><td>13/15</td><td>55,968</td><td>56,160</td><td>B</td><td>24</td><td>—</td><td>—</td><td>—</td></tr>
+</table>
+
+<h2>Priority 2: AFF3CT — Algorithm Validation &amp; BER Reference</h2>
+<div class="card">
+  <p><strong>Repo:</strong> <a href="https://github.com/aff3ct/aff3ct">github.com/aff3ct/aff3ct</a> &nbsp;|&nbsp; <strong>License:</strong> MIT</p>
+  <p>High-performance C++ LDPC encoder/decoder with SIMD (SSE/AVX/NEON). Supports Min-Sum variants (MIN, MINL, MINS/min-star) and Belief Propagation. DVB-S2 codes built-in; custom codes via AList/QC format.</p>
+  <p><strong>How we use it:</strong> Convert our ATSC 3.0 H matrices to AList format; run independent BER curves at the same SNR points; cross-validate our Python/Rust BER against AFF3CT; compare min-sum normalization performance (our &alpha;=0.75 vs AFF3CT variants).</p>
+</div>
+
+<h2>Priority 3: FEC-Archive-Verilog — FPGA RTL Architecture Reference</h2>
+<div class="card">
+  <p><strong>Repo:</strong> <a href="https://github.com/Lcrypto/FEC-Archive-Verilog">github.com/Lcrypto/FEC-Archive-Verilog</a></p>
+  <p>WiMAX (802.16e) QC-LDPC Normalized Min-Sum decoder in Verilog, rates 1/2 to 5/6 at length 2304. Synthesized on Cyclone IV: 210 MHz, 11,872 LCs, 37 M9K BRAMs. Contains CNU, VNU, and barrel shifter RTL modules.</p>
+  <p><strong>How we use it:</strong> Study RTL patterns for CNU/VNU pipeline, barrel shifter, BRAM partitioning. Compare resource estimates. Adapt QC-LDPC routing structure for Z=360 (they use Z=96). Not directly reusable (different code parameters), but same decoder algorithm.</p>
+</div>
+
+<h2>Priority 4: dvb_fpga — LDPC Encoder RTL &amp; Test Infrastructure</h2>
+<div class="card">
+  <p><strong>Repo:</strong> <a href="https://github.com/OpenResearchInstitute/dvb_fpga">github.com/OpenResearchInstitute/dvb_fpga</a> &nbsp;|&nbsp; <strong>License:</strong> CERN-OHL-W v2</p>
+  <p>DVB-S2 LDPC encoder in VHDL with AXI-Stream interfaces (~1,017 LUTs + 558 FFs). Table ROM organization (<code>ldpc_tables_pkg.vhd</code>) uses the same format as ATSC A/322. The DVB-S2 Type B (IRA) encoding is identical to ATSC 3.0 Type B.</p>
+  <p><strong>How we use it:</strong> Adapt table ROM organization for ATSC 3.0 parameters; follow AXI-Stream interface patterns for our FPGA I/O. Their decoder is missing — they want exactly what we're building.</p>
+</div>
+
+<h2>Other References</h2>
+<table>
+  <tr><th>Project</th><th>What</th><th>Relevance</th></tr>
+  <tr><td><a href="https://github.com/adimitris/verilog-LDPC-decoder">adimitris/verilog-LDPC-decoder</a></td><td>Tiny SystemVerilog min-sum decoder (length-10)</td><td>Educational only</td></tr>
+  <tr><td><a href="http://www.spiral.net/hardware/ldpc.html">spiral.net/hardware/ldpc</a></td><td>LDPC decoder RTL generator (any QC code)</td><td>Non-commercial license; validation reference</td></tr>
+  <tr><td><a href="https://github.com/biren15/Design-and-Verification-of-LDPC-Decoder">biren15/Design-and-Verification-of-LDPC-Decoder</a></td><td>Verilog min-sum + MATLAB co-design</td><td>Quantization strategy reference</td></tr>
+  <tr><td><a href="https://github.com/cea-wind/hls_ldpc_dec">cea-wind/hls_ldpc_dec</a></td><td>HLS-based WiMAX LDPC decoder</td><td>Alternative design methodology</td></tr>
+  <tr><td><a href="https://github.com/DavidToddMiller/gr-aff3ct_codes">gr-aff3ct_codes</a></td><td>GNU Radio + AFF3CT integration</td><td>Potential GNU Radio integration path</td></tr>
+</table>
+
+<h2>Validation Strategy</h2>
+<div class="diagram"><pre>
+Our Python decoder ─────── compare BER ──────── AFF3CT (with our H matrices)
+        │
+        ├── compare encoder output ────────────── gr-atsc3 encoder
+        │
+        └── generate test vectors ──┬──────── Our Rust decoder (bit-exact ✓)
+                                    │
+                                    └──────── Our FPGA sim (bit-exact 6-bit, pending)
+
+Our FPGA RTL architecture ── informed by ──── FEC-Archive-Verilog (CNU/VNU patterns)
+                          └── informed by ──── dvb_fpga (AXI-Stream, table ROM)
+</pre></div>
+
+
+<!-- ===================================================================== -->
 <!-- FOOTER -->
 <!-- ===================================================================== -->
 <hr style="border-color: var(--border); margin: 40px 0 20px;">
@@ -771,7 +967,7 @@ Decoded bits [648] -> info bits [324]
   ATSC 3.0 LDPC Decoder Project &middot;
   <a href="https://github.com/powderhound100/Ofdm-tv">github.com/powderhound100/Ofdm-tv</a> &middot;
   Python 3.12 + Rust (stable) + SystemVerilog &middot;
-  Report generated March 2026
+  Report generated March 30, 2026
 </p>
 
 </body>
