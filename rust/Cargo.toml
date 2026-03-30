@@ -1,0 +1,3 @@
+[workspace]
+members = ["ldpc-core", "ldpc-cli", "ldpc-bench"]
+resolver = "2"
