@@ -69,6 +69,81 @@ Ofdm-tv/
 
 ---
 
+## Known Complexity Issues and Mitigations
+
+### Issue 1: Encoder complexity — GF(2) Gaussian elimination is infeasible for full codes
+- **Problem:** The plan specifies GF(2) Gaussian elimination on H_parity (M×M matrix).
+  For mock code (M=360) this is fine. For real ATSC 3.0 (M up to 56,160) it's O(M^3) — too slow.
+- **Mitigation:** Use the **accumulator-based encoding** from the A/322 standard (same algorithm
+  gr-atsc3 implements). For Type B: iterate over LUT rows, XOR info bits, then accumulate
+  `p[j] ^= p[j-1]`. For Type A: two-phase accumulation with (q1, q2, m1, m2). GF(2) Gaussian
+  elimination is only needed for the mock code (where it's fast) or not at all if we use
+  accumulator encoding for mock code too.
+- **Action:** P2 encoder supports both: accumulator encoding (default, required for ATSC 3.0)
+  and GF(2) elimination (optional, for verification on small codes only).
+
+### Issue 2: ATSC 3.0 has TWO code types — Type A (MET) and Type B (IRA)
+- **Problem:** The plan assumes simple IRA structure for all rates. In reality:
+  - **Type B (IRA):** Rates 6/15, 8/15–13/15. Single accumulator, parameter q. Simple.
+  - **Type A (MET/Multi-Edge Type):** Rates 2/15–5/15, 7/15. Dual accumulators with
+    parameters q1, q2, m1, m2. Two-phase encoding. Different H matrix structure.
+- **Impact on decoder:** None — the decoder just sees H. The min-sum algorithm is identical
+  for both types. The Tanner graph may have different degree distributions.
+- **Impact on encoder:** Significant — must implement both encoding algorithms.
+- **Impact on FPGA:** Minimal — base_matrix_rom stores the expanded H for whatever code type.
+  The decoder architecture is unchanged.
+- **Source:** gr-atsc3 `ldpc_bb_impl.cc` has both `ldpc_bf_type_a()` and `ldpc_bf_type_b()`.
+
+### Issue 3: Base matrix format differs from our assumption
+- **Problem:** Our plan assumes a standard QC-LDPC base matrix (2D grid of shift values, -1 for
+  no edge). The gr-atsc3 tables use a **parity accumulator address list** format:
+  `{count, addr1, addr2, ..., addrN}` per row, with circular shift parameter q.
+- **Mitigation:** In `ldpc_code.py`, support BOTH formats:
+  1. Standard QC base matrix (for mock code and other standards like 802.11n)
+  2. ATSC 3.0 accumulator address list + q parameter (extracted from gr-atsc3)
+  Both expand to the same H matrix / Tanner graph — the decoder doesn't care about the source format.
+
+### Issue 4: Mock code base matrix not specified
+- **Problem:** The plan says "10×18 base matrix with Z=36" but doesn't give actual entries.
+  A random base matrix could yield a singular H_parity or poor error-floor performance.
+- **Mitigation:** Use a **known-good standardized code** for the mock: IEEE 802.11n rate-1/2
+  N=648 Z=27 (publicly available in the 802.11n spec, Table R1). Well-characterized waterfall,
+  proven parity structure. Alternatively, extract one of the ATSC 3.0 short-frame codes
+  (N=16200) from gr-atsc3 and use that — more representative of the target.
+- **Decision:** Use 802.11n rate-1/2 N=648 Z=27 for initial development. Add ATSC 3.0
+  short-frame (N=16200) and normal-frame (N=64800) as second and third test codes.
+
+### Issue 5: Barrel shifter decomposition is Z=360-specific
+- **Problem:** The 8×45 decomposition only works for Z=360. Mock code uses Z=27.
+- **Mitigation:** Parameterize barrel_shifter.sv with Z as a parameter. For Z=27,
+  use a simple log2(27)=5 stage shifter (trivial). For Z=360, use the 8×45 decomposition.
+  The decomposition strategy is selected at synthesis time via `generate` blocks.
+
+### Issue 6: Per-iteration test vectors scale badly for full codes
+- **Problem:** For N=64800 at 50 iterations, storing all c2v/v2c per iteration would be
+  ~200K edges × 50 iter × 4 bytes = ~40 MB per frame per SNR point. Manageable but large.
+- **Mitigation:** For mock code (N=648): store all per-iteration data (small, ~100 KB total).
+  For full ATSC 3.0 codes: store only iteration 0, iteration 1, and final iteration.
+  This is sufficient for debugging — if iter 0 and 1 match, the rest will too.
+
+### Issue 7: Alpha multiply doesn't need DSP slices
+- **Problem:** Plan estimates 32 DSP slices for alpha scaling.
+- **Reality:** α=0.75 = 3/4 = 1 - 1/4. Implemented as `x - (x >>> 2)` — just a subtractor
+  and a 2-bit right shift. Zero DSP slices needed.
+- **Updated resource estimate:** DSP usage drops from ~32 to ~0 for alpha scaling.
+  DSPs only needed if we add configurable alpha (unlikely for initial implementation).
+
+### Issue 8: Python decoder has O(degree²) inner loop
+- **Problem:** `self.cn_to_vn[c].index(v)` in the VNU and CNU loops is O(degree) per call,
+  making the overall complexity O(edges × degree) instead of O(edges).
+- **Impact:** Python is the reference (correctness, not speed), so this is acceptable.
+  But we must pre-compute the edge cross-reference maps to ensure the iteration order
+  and edge numbering are well-defined for test vector comparison.
+- **Mitigation:** In P1 (ldpc_code.py), pre-compute and export edge cross-reference maps
+  alongside cn_to_vn and vn_to_cn. These maps are what Rust uses directly.
+
+---
+
 ## Technical Trade-offs
 
 ### Rust vs C
@@ -119,7 +194,13 @@ Both compile via LLVM — identical machine code for SIMD intrinsics. Rust adds:
   - Stage 2: shift by remainder (shift_val % 45), 45-way barrel shifter with 6 stages
 - Saves ~30% LUTs vs monolithic shifter
 
-**Decision: Decomposed 8×45 barrel shifter.**
+**Decision: Decomposed 8×45 barrel shifter for Z=360. Simple log2 shifter for smaller Z (mock code Z=27). Selected at synthesis time via `generate`.**
+
+### Alpha Scaling Without DSP
+- α=0.75 = 3/4 = 1 - 1/4
+- Implementation: `result = x - (x >>> 2)` — one subtractor + one 2-bit arithmetic right shift
+- Zero DSP slices needed. Pure LUT logic.
+- If configurable alpha is needed later, use a single DSP for multiply. Not needed for v1.
 
 ### Simulation Target
 - Verilator: fast cycle-accurate C++ simulation, easy CI integration
@@ -141,50 +222,80 @@ Every subsystem has a well-defined input/output contract. When three implementat
 #### P1: ldpc_code.py — Code Definition
 
 ```
-INPUT:
-  base_matrix: list[list[int]]    # mb×nb array, entries are -1 (no edge) or 0..Z-1 (shift)
-  z: int                          # lifting factor (36 for mock, 360 for ATSC 3.0)
+INPUT (two formats supported):
+
+  Format A — Standard QC base matrix (for mock code / 802.11n / generic QC-LDPC):
+    base_matrix: list[list[int]]    # mb×nb array, entries are -1 (no edge) or 0..Z-1 (shift)
+    z: int                          # lifting factor (27 for 802.11n mock)
+
+  Format B — ATSC 3.0 accumulator address table (from gr-atsc3):
+    accum_table: list[list[int]]    # per-row address lists: [count, addr1, addr2, ...]
+    q: int                          # circular shift parameter (or q1, q2 for Type A)
+    n: int                          # codeword length (64800 or 16200)
+    k: int                          # info bit length (from params.cc)
+    code_type: str                  # "A" or "B"
 
 INTERNAL DERIVATIONS:
-  mb = len(base_matrix)           # number of row blocks
-  nb = len(base_matrix[0])        # number of column blocks
-  N  = nb * z                     # codeword length (648 for mock)
-  K  = (nb - mb) * z              # info bit length (288 for mock)
-  M  = mb * z                     # parity check count (360 for mock)
+  For Format A:
+    mb = len(base_matrix)
+    nb = len(base_matrix[0])
+    N  = nb * z
+    K  = (nb - mb) * z
+    M  = N - K
+  For Format B:
+    N, K from input
+    M  = N - K
 
 OUTPUT:
   H: scipy.sparse.csc_matrix      # M×N binary parity-check matrix
-     H[i*z+r, j*z+(r+s)%z] = 1   for each base_matrix[i][j] = s >= 0, r in 0..z-1
   cn_to_vn: list[list[int]]       # length M, cn_to_vn[c] = sorted list of variable nodes connected to check c
   vn_to_cn: list[list[int]]       # length N, vn_to_cn[v] = sorted list of check nodes connected to variable v
+  cn_edge_map: dict[(c,v) -> (cn_edge_idx, vn_edge_idx)]
+                                   # pre-computed edge cross-references for decoder
+                                   # eliminates O(degree) lookups in Python decoder
 
 INVARIANTS:
   H.shape == (M, N)
-  sum(H[c,:]) == number of non-negative entries in base_matrix[c // z] (for each row block)
   len(cn_to_vn[c]) == check node degree
   len(vn_to_cn[v]) == variable node degree
-  for all c,j: cn_to_vn[c][j] is in vn_to_cn[cn_to_vn[c][j]] (bidirectional consistency)
+  Bidirectional consistency: for all c,j: cn_to_vn[c][j] in vn_to_cn[cn_to_vn[c][j]]
+  Edge cross-refs: cn_edge_map[(c,v)] returns consistent indices into both adjacency lists
 ```
 
-#### P2: encoder.py — IRA Encoder
+#### P2: encoder.py — LDPC Encoder (two methods)
 
 ```
 INPUT:
   code: QcLdpcCode               # from P1
   info_bits: np.ndarray[uint8]    # length K, values {0, 1}
 
-INTERNAL:
-  H_info:   H[:, :K]             # M×K submatrix (info columns)
-  H_parity: H[:, K:]             # M×M submatrix (parity columns, dual-diagonal structure)
-  H_parity_inv: GF(2) inverse    # computed once, cached
+METHOD 1 — Accumulator encoding (default, works for all code sizes):
+  For ATSC 3.0 Type B (IRA, rates 6/15, 8/15–13/15):
+    For each row i of the accumulator address table:
+      For each address addr in table[i]:
+        For j in range(q):
+          parity[(addr + j*q) % M] ^= info_bits[i + j * (K/360)]
+    Then accumulate: parity[j] ^= parity[j-1] for j=1..M-1
+
+  For ATSC 3.0 Type A (MET, rates 2/15–5/15, 7/15):
+    Phase 1: m1 parity bits using table + q1
+    Phase 2: m2 parity bits using aux_table + q2
+    (See gr-atsc3 ldpc_bf_type_a() for reference)
+
+METHOD 2 — GF(2) Gaussian elimination (mock code only, for verification):
+  H_info:   H[:, :K]             # M×K submatrix
+  H_parity: H[:, K:]             # M×M submatrix
+  H_parity_inv: GF(2) inverse    # O(M^3), only feasible for M < ~1000
+  parity_bits = H_parity_inv @ (H_info @ info_bits) mod 2
 
 OUTPUT:
   codeword: np.ndarray[uint8]    # length N, values {0, 1}
      codeword[:K]  = info_bits
-     codeword[K:]  = parity_bits = H_parity_inv @ (H_info @ info_bits) mod 2
+     codeword[K:]  = parity_bits
 
 INVARIANT:
   H @ codeword % 2 == 0          # zero syndrome (ALWAYS, for any valid info_bits)
+  Both methods produce IDENTICAL codewords for the same input (cross-check on mock code)
 ```
 
 #### P3: channel.py — BPSK + AWGN + LLR
@@ -627,13 +738,28 @@ After the Python BER waterfall validates, review and document:
 | How sensitive is BER to LLR quantization? (run decoder with 6-bit quantized LLRs in Python) | Validates 6-bit decision before committing to FPGA datapath width |
 | Edge count and memory footprint for the mock code | Validates BRAM estimates before RTL design |
 
-**Only after P5b passes do worktrees 2 and 3 begin.**
+**P5c: CROSS-VALIDATION WITH gr-atsc3 (before Rust/FPGA begin)**
+
+Before leaving Python phase, validate our encoder against the gr-atsc3 encoder:
+
+| Test | Method | Pass Criteria |
+|------|--------|---------------|
+| Encode with ATSC 3.0 Type B code (rate 8/15 short) | Run our encoder + gr-atsc3 encoder with same info bits | Identical codewords |
+| Encode with ATSC 3.0 Type A code (rate 7/15 normal) | Same comparison | Identical codewords |
+| Decode gr-atsc3 encoded frames | Feed gr-atsc3 codeword through our channel + decoder | Successful decode |
+
+This validates that our base matrix extraction and accumulator encoding match the reference
+transmitter — critical since real OTA signals will come from transmitters using these exact tables.
+
+**Only after P5b and P5c pass do worktrees 2 and 3 begin.**
 
 | Task | File(s) | Description | Test |
 |------|---------|-------------|------|
 | P6 | gen_test_vectors.py | Export: channel LLRs (float32 + 6-bit quantized), expected decoded bits, intermediate c2v/v2c at each iteration, per-module test data | Files in test_vectors/, format documented, round-trip verified (reload and compare) |
 
-**Mock code: N=648, K=288, Z=36, rate ~4/9 (10×18 base matrix)**
+**Mock code: IEEE 802.11n rate-1/2 N=648 Z=27 (publicly standardized, well-characterized waterfall)**
+**Second code: ATSC 3.0 short-frame N=16200, Type B, rate 8/15 (extracted from gr-atsc3)**
+**Target code: ATSC 3.0 normal-frame N=64800, Type B, rate 7/15 or 8/15 (Seattle RF24 likely config)**
 
 ### Worktree 2: Rust Port (PARALLEL — after Python + P5b review)
 
@@ -809,6 +935,8 @@ Integration Testing:
 | What | Against | Method | Pass Criteria |
 |------|---------|--------|---------------|
 | Python encoder | H matrix | H @ codeword % 2 | All zeros |
+| Python encoder | gr-atsc3 encoder | Same info bits → same codeword | Bit-exact match (ATSC 3.0 codes) |
+| Python accumulator encoder | Python GF(2) encoder | Same info bits → same codeword | Bit-exact match (mock code only) |
 | Python decoder (noiseless) | Known codeword | decode(perfect_llr) | Converge iter=1, exact bits |
 | Python BER waterfall | Theory | Visual + shape | ~4 dB waterfall, rate-appropriate threshold |
 | Rust decoder | Python test vectors | Bit-exact decoded bits | 100% match on all test frames |
@@ -824,10 +952,18 @@ Integration Testing:
 
 ## Files to Create (all new)
 
-**Scaffolding:** .gitignore, README.md, docs/PLAN.md
-**Python (6):** ldpc_code.py, encoder.py, channel.py, decoder.py, test_ber.py, gen_test_vectors.py
+**Scaffolding:** .gitignore, README.md, docs/PLAN.md, docs/REFERENCES.md
+**Python (7):** ldpc_code.py, atsc3_tables.py (extracted from gr-atsc3), encoder.py, channel.py, decoder.py, test_ber.py, gen_test_vectors.py
 **Rust (8):** workspace Cargo.toml, ldpc-core/{Cargo.toml, lib.rs, code.rs, decoder.rs, simd.rs}, ldpc-bench/{Cargo.toml, decoder_bench.rs}, ldpc-cli/{Cargo.toml, main.rs}
 **FPGA RTL (12):** ldpc_top.sv, barrel_shifter.sv, check_node_unit.sv, sign_xor_tree.sv, min2_finder.sv, variable_node_unit.sv, message_ram.sv, base_matrix_rom.sv, iteration_ctrl.sv, syndrome_checker.sv, llr_input_buffer.sv, output_buffer.sv
 **FPGA TB (5):** tb_barrel_shifter.sv, tb_check_node_unit.sv, tb_min2_finder.sv, tb_variable_node_unit.sv, tb_ldpc_top.sv
 **FPGA Sim (2):** Makefile, run_all_tests.sh
-**Total: ~35 files**
+**Total: ~36 files**
+
+## Test Codes (progression)
+
+| Code | N | K | Z | Rate | Source | Purpose |
+|------|---|---|---|------|--------|---------|
+| IEEE 802.11n R1/2 | 648 | 324 | 27 | 0.50 | 802.11n spec Table R1 | Mock code, fast iteration, proven waterfall |
+| ATSC 3.0 Short 8/15 | 16200 | 8640 | 360 | 0.53 | gr-atsc3 Type B tables | Intermediate, real ATSC 3.0 structure |
+| ATSC 3.0 Normal 7/15 | 64800 | 30240 | 360 | 0.47 | gr-atsc3 Type A tables | Target code, Seattle RF24 likely config |
