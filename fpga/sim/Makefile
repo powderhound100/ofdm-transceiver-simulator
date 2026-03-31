@@ -41,12 +41,21 @@
 #     make tb_sym_sync        — Symbol sync testbench
 #     make tb_cfo_corr        — CFO corrector testbench
 #
+#   FIR Comparison:
+#     make tb_fir_compare     — FIR variant comparison testbench
+#
+#   Integration:
+#     make tb_ofdm_tx         — OFDM TX integration testbench
+#     make tb_ofdm_rx         — OFDM RX integration testbench
+#     make tb_loopback        — Full loopback (TX->CH->RX->LDPC) testbench
+#
 #   Aggregate:
 #     make all_ldpc           — All LDPC testbenches
-#     make all_channel        — All channel model testbenches
-#     make all_ofdm_rx        — All OFDM RX testbenches
-#     make all_ofdm_tx        — All OFDM TX testbenches
+#     make all_channel        — All channel model testbenches (incl. dense FIR + compare)
+#     make all_ofdm_rx        — All OFDM RX testbenches (incl. RX integration)
+#     make all_ofdm_tx        — All OFDM TX testbenches (incl. TX integration)
 #     make all_sync           — All sync/estimation testbenches
+#     make all_integration    — All integration testbenches (TX, RX, loopback)
 #     make all                — Run ALL testbenches
 #     make clean              — Remove generated files
 # =============================================================================
@@ -166,17 +175,23 @@ TB_SUB_MUX    := $(TB_DIR)/tb_subcarrier_mux.sv
 TB_NOISE_EST  := $(TB_DIR)/tb_noise_estimator.sv
 TB_SYM_SYNC   := $(TB_DIR)/tb_symbol_sync.sv
 TB_CFO_CORR   := $(TB_DIR)/tb_cfo_corrector.sv
+TB_FIR_CMP    := $(TB_DIR)/tb_fir_compare.sv
+TB_OFDM_TX    := $(TB_DIR)/tb_ofdm_tx_top.sv
+TB_OFDM_RX    := $(TB_DIR)/tb_ofdm_rx_top.sv
+TB_LOOPBACK   := $(TB_DIR)/tb_ofdm_loopback.sv
 
 # =============================================================================
 # Phony targets
 # =============================================================================
-.PHONY: all all_ldpc all_channel all_ofdm_rx all_ofdm_tx clean lint \
+.PHONY: all all_ldpc all_channel all_ofdm_rx all_ofdm_tx all_sync all_integration \
+        clean lint \
         tb_barrel_shifter tb_min2 tb_cnu tb_vnu tb_top \
         tb_fir_sparse tb_fir_dense32 tb_fir_dense64 tb_fir_dense128 tb_fir_dense256 \
-        tb_awgn tb_channel_model \
+        tb_fir_compare tb_awgn tb_channel_model \
         tb_cp_removal tb_fft tb_demux tb_ch_est tb_eq tb_demap tb_frame \
         tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux \
-        tb_noise_est tb_sym_sync tb_cfo_corr
+        tb_noise_est tb_sym_sync tb_cfo_corr \
+        tb_ofdm_tx tb_ofdm_rx tb_loopback
 
 # =============================================================================
 # Aggregate targets
@@ -184,19 +199,23 @@ TB_CFO_CORR   := $(TB_DIR)/tb_cfo_corrector.sv
 all_ldpc: tb_barrel_shifter tb_min2 tb_cnu tb_vnu tb_top
 	@echo "=== All LDPC testbenches completed ==="
 
-all_channel: tb_fir_sparse tb_awgn tb_channel_model
+all_channel: tb_fir_sparse tb_fir_dense32 tb_fir_dense64 tb_fir_dense128 tb_fir_dense256 \
+             tb_fir_compare tb_awgn tb_channel_model
 	@echo "=== All channel model testbenches completed ==="
 
-all_ofdm_rx: tb_cp_removal tb_fft tb_demux tb_ch_est tb_eq tb_demap tb_frame
+all_ofdm_rx: tb_cp_removal tb_fft tb_demux tb_ch_est tb_eq tb_demap tb_frame tb_ofdm_rx
 	@echo "=== All OFDM RX testbenches completed ==="
 
-all_ofdm_tx: tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux
+all_ofdm_tx: tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux tb_ofdm_tx
 	@echo "=== All OFDM TX testbenches completed ==="
 
 all_sync: tb_noise_est tb_sym_sync tb_cfo_corr
 	@echo "=== All sync/estimation testbenches completed ==="
 
-all: all_ldpc all_channel all_ofdm_rx all_ofdm_tx all_sync
+all_integration: tb_ofdm_tx tb_ofdm_rx tb_loopback
+	@echo "=== All integration testbenches completed ==="
+
+all: all_ldpc all_channel all_ofdm_rx all_ofdm_tx all_sync all_integration
 	@echo ""
 	@echo "============================================"
 	@echo "All testbenches completed."
@@ -377,6 +396,40 @@ tb_cfo_corr: tb_cfo_corrector.vvp
 	$(VVP) $<
 
 tb_cfo_corrector.vvp: $(TB_CFO_CORR) $(RTL_CFO_CORR)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+# =============================================================================
+# FIR Comparison Testbench
+# =============================================================================
+RTL_FIR_ALL  := $(RTL_FIR_SP) $(RTL_FIR_D32) $(RTL_FIR_D64) $(RTL_FIR_D128) $(RTL_FIR_D256)
+
+tb_fir_compare: tb_fir_compare.vvp
+	$(VVP) $<
+
+tb_fir_compare.vvp: $(TB_FIR_CMP) $(RTL_FIR_ALL)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+# =============================================================================
+# Integration Testbenches
+# =============================================================================
+tb_ofdm_tx: tb_ofdm_tx_top.vvp
+	$(VVP) $<
+
+tb_ofdm_tx_top.vvp: $(TB_OFDM_TX) $(RTL_OFDM_TX)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+tb_ofdm_rx: tb_ofdm_rx_top.vvp
+	$(VVP) $<
+
+tb_ofdm_rx_top.vvp: $(TB_OFDM_RX) $(RTL_OFDM_RX)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+RTL_LOOPBACK_ALL := $(RTL_OFDM_TX) $(RTL_CH_TOP) $(RTL_OFDM_RX) $(RTL_LDPC_ALL) $(RTL_LOOPBACK)
+
+tb_loopback: tb_ofdm_loopback.vvp
+	$(VVP) $<
+
+tb_ofdm_loopback.vvp: $(TB_LOOPBACK) $(RTL_LOOPBACK_ALL)
 	$(IVERILOG) $(IVFLAGS) -o $@ $^
 
 # =============================================================================
