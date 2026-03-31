@@ -19,6 +19,41 @@ CHANNEL_MODELS = {
         "powers_db": [-3.0, 0.0, -2.0, -6.0, -8.0, -10.0],
         "description": "Typical Urban 6-tap (TU-6), standard DTV test channel",
     },
+    "cost207_ra": {
+        "delays": [0, 1, 2, 3],
+        "powers_db": [0.0, -2.0, -10.0, -20.0],
+        "description": "COST 207 Rural Area — 4 taps, short delay spread",
+    },
+    "cost207_ht": {
+        "delays": [0, 2, 4, 7, 11, 17],
+        "powers_db": [0.0, -2.0, -4.0, -7.0, -6.0, -12.0],
+        "description": "COST 207 Hilly Terrain — 6 taps, moderate delay spread",
+    },
+    "brazil_a": {
+        "delays": [0, 3, 13],
+        "powers_db": [0.0, -15.0, -20.0],
+        "description": "Brazil channel A — 3 taps, indoor reception",
+    },
+    "brazil_b": {
+        "delays": [0, 1, 3, 11, 57],
+        "powers_db": [0.0, -12.0, -4.0, -7.0, -15.0],
+        "description": "Brazil channel B — 5 taps, outdoor pedestrian",
+    },
+    "brazil_c": {
+        "delays": [0, 1, 2, 5, 11, 17],
+        "powers_db": [0.0, -5.0, -2.0, -6.0, -8.0, -10.0],
+        "description": "Brazil channel C — 6 taps, vehicular urban",
+    },
+    "brazil_d": {
+        "delays": [0, 3, 5, 13, 50, 120],
+        "powers_db": [0.0, -10.0, -3.0, -4.0, -7.0, -15.0],
+        "description": "Brazil channel D — 6 taps, mountainous / SFN",
+    },
+    "brazil_e": {
+        "delays": [0, 1, 3, 10, 25, 138],
+        "powers_db": [0.0, -5.0, -2.0, -6.0, -8.0, -10.0],
+        "description": "Brazil channel E — 6 taps, SFN equal-power echoes",
+    },
 }
 
 
