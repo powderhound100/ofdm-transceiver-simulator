@@ -3,3 +3,7 @@ pub mod decoder;
 pub mod simd;
 pub mod noise_estimator;
 pub mod sync;
+pub mod qam;
+pub mod ofdm;
+pub mod channel;
+pub mod estimator;
