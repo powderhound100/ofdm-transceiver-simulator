@@ -44,6 +44,7 @@ module ldpc_top #(
     // =========================================================================
     localparam int N = NB * Z;   // total variable nodes (648)
     localparam int M = MB * Z;   // total check nodes (324)
+    localparam int NUM_EDGES = MB * NB;  // edge blocks in base matrix (288)
 
     // =========================================================================
     // Top-level FSM
@@ -195,63 +196,59 @@ module ldpc_top #(
 
     // =========================================================================
     // V2C message RAM (stores v2c messages for CNU to read)
-    // Organized: NB column blocks, each stores the v2c messages
-    // For simplicity we use a flat RAM addressed by (col_block * Z + z_idx)
-    // Actually we need edge-based storage. Simplified: we store per VN block.
+    // Edge-indexed: (row_block * NB + col_block) * Z + z gives a unique
+    // address per edge, so messages are never overwritten when a variable
+    // node connects to multiple check nodes.
     // =========================================================================
-    // TODO(high): v2c/c2v memories are sized per-node (N and M entries) but a
-    // flooding decoder needs per-edge storage (num_edges >> N,M). For the 802.11n
-    // code, there are 2376 edges vs 648+324 nodes. Current design loses multi-edge
-    // messages when multiple check nodes connect to the same variable node.
-    // Fix: size by total edges, or restructure as (row_block x col_block x Z).
-    // Also: use registered reads (not combinational) so synthesis infers BRAM.
-    // V2C storage: NB blocks of Z elements, each W bits
-    logic [W-1:0] v2c_mem [0:N-1];
+    logic [W-1:0] v2c_mem [0:NUM_EDGES*Z-1];  // 288*27 = 7776 entries
 
-    // Write v2c from VNU output
+    // Write v2c from VNU output — capture both row and col at write time
+    logic [6:0] vnu_wr_row;
     logic [4:0] vnu_wr_col;
     logic       vnu_wr_en;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < NUM_EDGES*Z; i++)
                 v2c_mem[i] <= '0;
         end else if (vnu_wr_en) begin
             for (int z = 0; z < Z; z++)
-                v2c_mem[vnu_wr_col * Z + z] <= vnu_v2c_out[z*W +: W];
+                v2c_mem[(vnu_wr_row * NB + vnu_wr_col) * Z + z] <= vnu_v2c_out[z*W +: W];
         end
     end
 
-    // Read v2c for CNU: pack Z elements
+    // Read v2c for CNU: pack Z elements using current edge address
     always_comb begin
         for (int z = 0; z < Z; z++)
-            cnu_v2c_in[z*W +: W] = v2c_mem[ctrl_current_col * Z + z];
+            cnu_v2c_in[z*W +: W] = v2c_mem[(ctrl_current_row * NB + ctrl_current_col) * Z + z];
     end
 
     // =========================================================================
     // C2V message RAM (stores c2v messages for VNU to read)
-    // For simplicity, flat storage indexed by edge.
-    // We use (row_block * Z + z_idx) addressing.
+    // Edge-indexed: (row_block * NB + col_block) * Z + z gives a unique
+    // address per edge, matching the v2c_mem organisation.
     // =========================================================================
-    logic [W-1:0] c2v_mem [0:M-1];
+    logic [W-1:0] c2v_mem [0:NUM_EDGES*Z-1];  // 288*27 = 7776 entries
 
+    // Write c2v from CNU output — capture both row and col at write time
     logic [6:0] cnu_wr_row;
+    logic [4:0] cnu_wr_col;
     logic       cnu_wr_en;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            for (int i = 0; i < M; i++)
+            for (int i = 0; i < NUM_EDGES*Z; i++)
                 c2v_mem[i] <= '0;
         end else if (cnu_wr_en) begin
             for (int z = 0; z < Z; z++)
-                c2v_mem[cnu_wr_row * Z + z] <= cnu_c2v_out[z*W +: W];
+                c2v_mem[(cnu_wr_row * NB + cnu_wr_col) * Z + z] <= cnu_c2v_out[z*W +: W];
         end
     end
 
-    // Read c2v for VNU: pack Z elements
+    // Read c2v for VNU: pack Z elements using current edge address
     always_comb begin
         for (int z = 0; z < Z; z++)
-            vnu_c2v_in[z*W +: W] = c2v_mem[ctrl_current_row * Z + z];
+            vnu_c2v_in[z*W +: W] = c2v_mem[(ctrl_current_row * NB + ctrl_current_col) * Z + z];
     end
 
     // =========================================================================
@@ -356,9 +353,11 @@ module ldpc_top #(
             out_write_en    <= 1'b0;
             out_frame_done  <= 1'b0;
             vnu_wr_en       <= 1'b0;
+            vnu_wr_row      <= '0;
             vnu_wr_col      <= '0;
             cnu_wr_en       <= 1'b0;
             cnu_wr_row      <= '0;
+            cnu_wr_col      <= '0;
         end else begin
             // Defaults
             ctrl_start     <= 1'b0;
@@ -392,15 +391,17 @@ module ldpc_top #(
                 end
 
                 TOP_ITERATE: begin
-                    // Forward CNU outputs to c2v memory
+                    // Forward CNU outputs to c2v memory (edge-indexed)
                     if (cnu_c2v_valid) begin
                         cnu_wr_en  <= 1'b1;
                         cnu_wr_row <= ctrl_current_row;
+                        cnu_wr_col <= ctrl_current_col;
                     end
 
-                    // Forward VNU outputs to v2c memory
+                    // Forward VNU outputs to v2c memory (edge-indexed)
                     if (vnu_valid) begin
                         vnu_wr_en  <= 1'b1;
+                        vnu_wr_row <= ctrl_current_row;
                         vnu_wr_col <= ctrl_current_col;
                     end
 
