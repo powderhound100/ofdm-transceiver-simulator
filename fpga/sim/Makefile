@@ -36,11 +36,17 @@
 #     make tb_ifft            — 64-point IFFT testbench
 #     make tb_mux             — Subcarrier mux testbench
 #
+#   Sync / Estimation (Phase G):
+#     make tb_noise_est       — Noise estimator testbench
+#     make tb_sym_sync        — Symbol sync testbench
+#     make tb_cfo_corr        — CFO corrector testbench
+#
 #   Aggregate:
 #     make all_ldpc           — All LDPC testbenches
 #     make all_channel        — All channel model testbenches
 #     make all_ofdm_rx        — All OFDM RX testbenches
 #     make all_ofdm_tx        — All OFDM TX testbenches
+#     make all_sync           — All sync/estimation testbenches
 #     make all                — Run ALL testbenches
 #     make clean              — Remove generated files
 # =============================================================================
@@ -157,6 +163,9 @@ TB_MAPPER     := $(TB_DIR)/tb_qam_mapper.sv
 TB_CP_INS     := $(TB_DIR)/tb_cp_insertion.sv
 TB_IFFT       := $(TB_DIR)/tb_ifft_64pt.sv
 TB_SUB_MUX    := $(TB_DIR)/tb_subcarrier_mux.sv
+TB_NOISE_EST  := $(TB_DIR)/tb_noise_estimator.sv
+TB_SYM_SYNC   := $(TB_DIR)/tb_symbol_sync.sv
+TB_CFO_CORR   := $(TB_DIR)/tb_cfo_corrector.sv
 
 # =============================================================================
 # Phony targets
@@ -166,7 +175,8 @@ TB_SUB_MUX    := $(TB_DIR)/tb_subcarrier_mux.sv
         tb_fir_sparse tb_fir_dense32 tb_fir_dense64 tb_fir_dense128 tb_fir_dense256 \
         tb_awgn tb_channel_model \
         tb_cp_removal tb_fft tb_demux tb_ch_est tb_eq tb_demap tb_frame \
-        tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux
+        tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux \
+        tb_noise_est tb_sym_sync tb_cfo_corr
 
 # =============================================================================
 # Aggregate targets
@@ -183,7 +193,10 @@ all_ofdm_rx: tb_cp_removal tb_fft tb_demux tb_ch_est tb_eq tb_demap tb_frame
 all_ofdm_tx: tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux
 	@echo "=== All OFDM TX testbenches completed ==="
 
-all: all_ldpc all_channel all_ofdm_rx all_ofdm_tx
+all_sync: tb_noise_est tb_sym_sync tb_cfo_corr
+	@echo "=== All sync/estimation testbenches completed ==="
+
+all: all_ldpc all_channel all_ofdm_rx all_ofdm_tx all_sync
 	@echo ""
 	@echo "============================================"
 	@echo "All testbenches completed."
@@ -343,6 +356,27 @@ tb_mux: tb_subcarrier_mux.vvp
 	$(VVP) $<
 
 tb_subcarrier_mux.vvp: $(TB_SUB_MUX) $(RTL_SUB_MUX)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+# =============================================================================
+# Sync / Estimation Testbenches (Phase G)
+# =============================================================================
+tb_noise_est: tb_noise_estimator.vvp
+	$(VVP) $<
+
+tb_noise_estimator.vvp: $(TB_NOISE_EST) $(RTL_NOISE_EST)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+tb_sym_sync: tb_symbol_sync.vvp
+	$(VVP) $<
+
+tb_symbol_sync.vvp: $(TB_SYM_SYNC) $(RTL_SYM_SYNC)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+tb_cfo_corr: tb_cfo_corrector.vvp
+	$(VVP) $<
+
+tb_cfo_corrector.vvp: $(TB_CFO_CORR) $(RTL_CFO_CORR)
 	$(IVERILOG) $(IVFLAGS) -o $@ $^
 
 # =============================================================================
