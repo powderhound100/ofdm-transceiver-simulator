@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- 256QAM TU-6 LMMSE: Python vs Rust vs RTL</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+</svg>

@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OFDM Transceiver BER Charts</title>
+<style>body{background:#11111b;color:#cdd6f4;font-family:sans-serif;max-width:960px;margin:0 auto;padding:20px}h1{text-align:center}h2{color:#89b4fa;border-bottom:1px solid #313244;padding-bottom:8px}svg{display:block;margin:16px auto}</style>
+</head>
+<body>
+<h1>OFDM Transceiver Simulator &mdash; BER Charts</h1>
+
+<h2>Group A: Modulation Comparison</h2>
+<!-- ber_chart_a1.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" style="max-width:900px;">
+<rect width="900" height="500" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="800" height="420" fill="#1e1e2e" stroke="#313244"/>
+<text x="450" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- Flat Channel, All Modulations (LMMSE+MMSE)</text>
+<line x1="70" y1="30" x2="870" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="114" x2="870" y2="114" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="118" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="198" x2="870" y2="198" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="202" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="282" x2="870" y2="282" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="286" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="366" x2="870" y2="366" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="370" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="450" x2="870" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="454" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="184" y1="30" x2="184" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="184" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="299" y1="30" x2="299" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="299" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="413" y1="30" x2="413" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="527" y1="30" x2="527" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="527" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="641" y1="30" x2="641" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="641" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="756" y1="30" x2="756" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="756" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="870" y1="30" x2="870" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="870" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="450" y="495" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="240" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,240)">Bit Error Rate</text>
+<polyline points="70.0,73.5 81.4,75.5 92.9,76.2 104.3,77.0 115.7,79.6 127.1,80.7 138.6,84.1 150.0,84.1 161.4,88.5 172.9,91.0 184.3,100.9 195.7,110.4 207.1,146.0 218.6,187.0" fill="none" stroke="#a6e3a1" stroke-width="2.5" />
+<circle cx="70.0" cy="73.5" r="3" fill="#a6e3a1"/>
+<circle cx="81.4" cy="75.5" r="3" fill="#a6e3a1"/>
+<circle cx="92.9" cy="76.2" r="3" fill="#a6e3a1"/>
+<circle cx="104.3" cy="77.0" r="3" fill="#a6e3a1"/>
+<circle cx="115.7" cy="79.6" r="3" fill="#a6e3a1"/>
+<circle cx="127.1" cy="80.7" r="3" fill="#a6e3a1"/>
+<circle cx="138.6" cy="84.1" r="3" fill="#a6e3a1"/>
+<circle cx="150.0" cy="84.1" r="3" fill="#a6e3a1"/>
+<circle cx="161.4" cy="88.5" r="3" fill="#a6e3a1"/>
+<circle cx="172.9" cy="91.0" r="3" fill="#a6e3a1"/>
+<circle cx="184.3" cy="100.9" r="3" fill="#a6e3a1"/>
+<circle cx="195.7" cy="110.4" r="3" fill="#a6e3a1"/>
+<circle cx="207.1" cy="146.0" r="3" fill="#a6e3a1"/>
+<circle cx="218.6" cy="187.0" r="3" fill="#a6e3a1"/>
+<polyline points="70.0,65.7 92.9,69.7 115.7,71.5 138.6,73.0 161.4,77.5 184.3,83.7 207.1,90.7 230.0,97.9 252.9,121.6 275.7,132.2 298.6,132.2 321.4,184.7" fill="none" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="70.0" cy="65.7" r="3" fill="#89b4fa"/>
+<circle cx="92.9" cy="69.7" r="3" fill="#89b4fa"/>
+<circle cx="115.7" cy="71.5" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="73.0" r="3" fill="#89b4fa"/>
+<circle cx="161.4" cy="77.5" r="3" fill="#89b4fa"/>
+<circle cx="184.3" cy="83.7" r="3" fill="#89b4fa"/>
+<circle cx="207.1" cy="90.7" r="3" fill="#89b4fa"/>
+<circle cx="230.0" cy="97.9" r="3" fill="#89b4fa"/>
+<circle cx="252.9" cy="121.6" r="3" fill="#89b4fa"/>
+<circle cx="275.7" cy="132.2" r="3" fill="#89b4fa"/>
+<circle cx="298.6" cy="132.2" r="3" fill="#89b4fa"/>
+<circle cx="321.4" cy="184.7" r="3" fill="#89b4fa"/>
+<polyline points="70.0,62.1 92.9,64.0 115.7,64.5 138.6,66.5 161.4,67.7 184.3,70.5 207.1,72.5 230.0,73.5 252.9,77.7 275.7,80.1 298.6,81.5 321.4,89.4 344.3,107.5 367.1,111.9 390.0,148.3" fill="none" stroke="#f9e2af" stroke-width="2.5" />
+<circle cx="70.0" cy="62.1" r="3" fill="#f9e2af"/>
+<circle cx="92.9" cy="64.0" r="3" fill="#f9e2af"/>
+<circle cx="115.7" cy="64.5" r="3" fill="#f9e2af"/>
+<circle cx="138.6" cy="66.5" r="3" fill="#f9e2af"/>
+<circle cx="161.4" cy="67.7" r="3" fill="#f9e2af"/>
+<circle cx="184.3" cy="70.5" r="3" fill="#f9e2af"/>
+<circle cx="207.1" cy="72.5" r="3" fill="#f9e2af"/>
+<circle cx="230.0" cy="73.5" r="3" fill="#f9e2af"/>
+<circle cx="252.9" cy="77.7" r="3" fill="#f9e2af"/>
+<circle cx="275.7" cy="80.1" r="3" fill="#f9e2af"/>
+<circle cx="298.6" cy="81.5" r="3" fill="#f9e2af"/>
+<circle cx="321.4" cy="89.4" r="3" fill="#f9e2af"/>
+<circle cx="344.3" cy="107.5" r="3" fill="#f9e2af"/>
+<circle cx="367.1" cy="111.9" r="3" fill="#f9e2af"/>
+<circle cx="390.0" cy="148.3" r="3" fill="#f9e2af"/>
+<polyline points="70.0,60.0 92.9,60.0 115.7,62.6 138.6,63.1 161.4,64.7 184.3,66.2 207.1,66.8 230.0,66.8 252.9,69.1 275.7,70.3 298.6,73.0 321.4,76.3 344.3,77.5 367.1,82.4 390.0,82.6 412.9,86.6 435.7,90.7 458.6,101.5 481.4,128.1 504.3,255.7" fill="none" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="70.0" cy="60.0" r="3" fill="#f38ba8"/>
+<circle cx="92.9" cy="60.0" r="3" fill="#f38ba8"/>
+<circle cx="115.7" cy="62.6" r="3" fill="#f38ba8"/>
+<circle cx="138.6" cy="63.1" r="3" fill="#f38ba8"/>
+<circle cx="161.4" cy="64.7" r="3" fill="#f38ba8"/>
+<circle cx="184.3" cy="66.2" r="3" fill="#f38ba8"/>
+<circle cx="207.1" cy="66.8" r="3" fill="#f38ba8"/>
+<circle cx="230.0" cy="66.8" r="3" fill="#f38ba8"/>
+<circle cx="252.9" cy="69.1" r="3" fill="#f38ba8"/>
+<circle cx="275.7" cy="70.3" r="3" fill="#f38ba8"/>
+<circle cx="298.6" cy="73.0" r="3" fill="#f38ba8"/>
+<circle cx="321.4" cy="76.3" r="3" fill="#f38ba8"/>
+<circle cx="344.3" cy="77.5" r="3" fill="#f38ba8"/>
+<circle cx="367.1" cy="82.4" r="3" fill="#f38ba8"/>
+<circle cx="390.0" cy="82.6" r="3" fill="#f38ba8"/>
+<circle cx="412.9" cy="86.6" r="3" fill="#f38ba8"/>
+<circle cx="435.7" cy="90.7" r="3" fill="#f38ba8"/>
+<circle cx="458.6" cy="101.5" r="3" fill="#f38ba8"/>
+<circle cx="481.4" cy="128.1" r="3" fill="#f38ba8"/>
+<circle cx="504.3" cy="255.7" r="3" fill="#f38ba8"/>
+<line x1="680" y1="45" x2="700" y2="45" stroke="#a6e3a1" stroke-width="2.5" />
+<circle cx="690" cy="45" r="3" fill="#a6e3a1"/>
+<text x="705" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">BPSK</text>
+<line x1="680" y1="63" x2="700" y2="63" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="690" cy="63" r="3" fill="#89b4fa"/>
+<text x="705" y="67" fill="#cdd6f4" font-size="11" font-family="sans-serif">QPSK</text>
+<line x1="680" y1="81" x2="700" y2="81" stroke="#f9e2af" stroke-width="2.5" />
+<circle cx="690" cy="81" r="3" fill="#f9e2af"/>
+<text x="705" y="85" fill="#cdd6f4" font-size="11" font-family="sans-serif">16QAM</text>
+<line x1="680" y1="99" x2="700" y2="99" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="690" cy="99" r="3" fill="#f38ba8"/>
+<text x="705" y="103" fill="#cdd6f4" font-size="11" font-family="sans-serif">64QAM</text>
+</svg>
+
+<!-- ber_chart_a2.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" style="max-width:900px;">
+<rect width="900" height="500" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="800" height="420" fill="#1e1e2e" stroke="#313244"/>
+<text x="450" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- TU-6 Channel, All Modulations (LMMSE+MMSE)</text>
+<line x1="70" y1="30" x2="870" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="114" x2="870" y2="114" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="118" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="198" x2="870" y2="198" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="202" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="282" x2="870" y2="282" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="286" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="366" x2="870" y2="366" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="370" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="450" x2="870" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="454" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="184" y1="30" x2="184" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="184" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="299" y1="30" x2="299" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="299" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="413" y1="30" x2="413" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="527" y1="30" x2="527" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="527" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="641" y1="30" x2="641" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="641" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="756" y1="30" x2="756" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="756" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="870" y1="30" x2="870" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="870" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="450" y="495" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="240" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,240)">Bit Error Rate</text>
+<polyline points="70.0,58.2 92.9,58.2 115.7,58.2 138.6,58.2 161.4,58.2 184.3,58.2 207.1,58.2 230.0,58.2 252.9,58.2 275.7,58.2 298.6,58.2 321.4,58.2 344.3,58.2 367.1,58.2 390.0,58.2 412.9,58.2 435.7,58.2 458.6,58.2 481.4,58.2 504.3,58.2 527.1,58.2 550.0,58.2 572.9,58.2 595.7,58.2 618.6,58.2 641.4,58.2" fill="none" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="70.0" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="92.9" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="115.7" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="161.4" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="184.3" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="207.1" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="230.0" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="252.9" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="275.7" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="298.6" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="321.4" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="344.3" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="367.1" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="390.0" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="412.9" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="435.7" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="458.6" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="481.4" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="504.3" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="527.1" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="550.0" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="572.9" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="595.7" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="618.6" cy="58.2" r="3" fill="#89b4fa"/>
+<circle cx="641.4" cy="58.2" r="3" fill="#89b4fa"/>
+<polyline points="70.0,58.3 92.9,58.3 115.7,58.3 138.6,58.3 161.4,58.3 184.3,58.3 207.1,58.3 230.0,58.3 252.9,58.3 275.7,58.3 298.6,58.3 321.4,58.3 344.3,58.3 367.1,58.3 390.0,58.3 412.9,58.3 435.7,58.3 458.6,58.3 481.4,58.3 504.3,58.3 527.1,58.3 550.0,58.3 572.9,58.3 595.7,58.3 618.6,58.3 641.4,58.3" fill="none" stroke="#f9e2af" stroke-width="2.5" />
+<circle cx="70.0" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="92.9" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="115.7" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="138.6" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="161.4" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="184.3" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="207.1" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="230.0" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="252.9" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="275.7" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="298.6" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="321.4" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="344.3" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="367.1" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="390.0" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="412.9" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="435.7" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="458.6" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="481.4" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="504.3" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="527.1" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="550.0" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="572.9" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="595.7" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="618.6" cy="58.3" r="3" fill="#f9e2af"/>
+<circle cx="641.4" cy="58.3" r="3" fill="#f9e2af"/>
+<polyline points="70.0,57.5 92.9,57.5 115.7,57.5 138.6,57.5 161.4,57.5 184.3,57.5 207.1,57.5 230.0,57.5 252.9,57.5 275.7,57.5 298.6,57.5 321.4,57.5 344.3,57.5 367.1,58.2 390.0,58.2 412.9,58.2 435.7,58.2 458.6,58.2 481.4,58.2 504.3,58.2 527.1,58.2 550.0,58.2 572.9,58.2 595.7,58.2 618.6,58.2 641.4,58.2" fill="none" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="70.0" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="92.9" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="115.7" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="138.6" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="161.4" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="184.3" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="207.1" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="230.0" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="252.9" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="275.7" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="298.6" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="321.4" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="344.3" cy="57.5" r="3" fill="#f38ba8"/>
+<circle cx="367.1" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="390.0" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="412.9" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="435.7" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="458.6" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="481.4" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="504.3" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="527.1" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="550.0" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="572.9" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="595.7" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="618.6" cy="58.2" r="3" fill="#f38ba8"/>
+<circle cx="641.4" cy="58.2" r="3" fill="#f38ba8"/>
+<line x1="680" y1="45" x2="700" y2="45" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="690" cy="45" r="3" fill="#89b4fa"/>
+<text x="705" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">QPSK</text>
+<line x1="680" y1="63" x2="700" y2="63" stroke="#f9e2af" stroke-width="2.5" />
+<circle cx="690" cy="63" r="3" fill="#f9e2af"/>
+<text x="705" y="67" fill="#cdd6f4" font-size="11" font-family="sans-serif">16QAM</text>
+<line x1="680" y1="81" x2="700" y2="81" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="690" cy="81" r="3" fill="#f38ba8"/>
+<text x="705" y="85" fill="#cdd6f4" font-size="11" font-family="sans-serif">64QAM</text>
+</svg>
+
+
+<h2>Group B: Channel Comparison</h2>
+<!-- ber_chart_b1.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- QPSK Across All Channels (LMMSE+MMSE)</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+<polyline points="70.0,57.2 87.1,60.3 104.3,61.6 121.4,62.8 138.6,66.2 155.7,70.9 172.9,76.3 190.0,81.8 207.1,99.8 224.3,107.9 241.4,107.9 258.6,147.9" fill="none" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="70.0" cy="57.2" r="3" fill="#89b4fa"/>
+<circle cx="87.1" cy="60.3" r="3" fill="#89b4fa"/>
+<circle cx="104.3" cy="61.6" r="3" fill="#89b4fa"/>
+<circle cx="121.4" cy="62.8" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="66.2" r="3" fill="#89b4fa"/>
+<circle cx="155.7" cy="70.9" r="3" fill="#89b4fa"/>
+<circle cx="172.9" cy="76.3" r="3" fill="#89b4fa"/>
+<circle cx="190.0" cy="81.8" r="3" fill="#89b4fa"/>
+<circle cx="207.1" cy="99.8" r="3" fill="#89b4fa"/>
+<circle cx="224.3" cy="107.9" r="3" fill="#89b4fa"/>
+<circle cx="241.4" cy="107.9" r="3" fill="#89b4fa"/>
+<circle cx="258.6" cy="147.9" r="3" fill="#89b4fa"/>
+<polyline points="70.0,51.1 87.1,51.8 104.3,52.7 121.4,52.7 138.6,52.7 155.7,53.5 172.9,55.0 190.0,55.0 207.1,55.7 224.3,55.7 241.4,55.7 258.6,55.7 275.7,57.4 292.9,59.3 310.0,59.3 327.1,59.3 344.3,59.3 361.4,59.3 378.6,59.5 395.7,59.5 412.9,59.5 430.0,59.6 447.1,59.6 464.3,59.6 481.4,59.6 498.6,60.0" fill="none" stroke="#89b4fa" stroke-width="2.5" stroke-dasharray="8,4" />
+<circle cx="70.0" cy="51.1" r="3" fill="#89b4fa"/>
+<circle cx="87.1" cy="51.8" r="3" fill="#89b4fa"/>
+<circle cx="104.3" cy="52.7" r="3" fill="#89b4fa"/>
+<circle cx="121.4" cy="52.7" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="52.7" r="3" fill="#89b4fa"/>
+<circle cx="155.7" cy="53.5" r="3" fill="#89b4fa"/>
+<circle cx="172.9" cy="55.0" r="3" fill="#89b4fa"/>
+<circle cx="190.0" cy="55.0" r="3" fill="#89b4fa"/>
+<circle cx="207.1" cy="55.7" r="3" fill="#89b4fa"/>
+<circle cx="224.3" cy="55.7" r="3" fill="#89b4fa"/>
+<circle cx="241.4" cy="55.7" r="3" fill="#89b4fa"/>
+<circle cx="258.6" cy="55.7" r="3" fill="#89b4fa"/>
+<circle cx="275.7" cy="57.4" r="3" fill="#89b4fa"/>
+<circle cx="292.9" cy="59.3" r="3" fill="#89b4fa"/>
+<circle cx="310.0" cy="59.3" r="3" fill="#89b4fa"/>
+<circle cx="327.1" cy="59.3" r="3" fill="#89b4fa"/>
+<circle cx="344.3" cy="59.3" r="3" fill="#89b4fa"/>
+<circle cx="361.4" cy="59.3" r="3" fill="#89b4fa"/>
+<circle cx="378.6" cy="59.5" r="3" fill="#89b4fa"/>
+<circle cx="395.7" cy="59.5" r="3" fill="#89b4fa"/>
+<circle cx="412.9" cy="59.5" r="3" fill="#89b4fa"/>
+<circle cx="430.0" cy="59.6" r="3" fill="#89b4fa"/>
+<circle cx="447.1" cy="59.6" r="3" fill="#89b4fa"/>
+<circle cx="464.3" cy="59.6" r="3" fill="#89b4fa"/>
+<circle cx="481.4" cy="59.6" r="3" fill="#89b4fa"/>
+<circle cx="498.6" cy="60.0" r="3" fill="#89b4fa"/>
+<polyline points="70.0,51.5 87.1,51.5 104.3,51.5 121.4,51.5 138.6,51.5 155.7,51.5 172.9,51.5 190.0,51.5 207.1,51.5 224.3,51.5 241.4,51.5 258.6,51.5 275.7,51.5 292.9,51.5 310.0,51.5 327.1,51.5 344.3,51.5 361.4,51.5 378.6,51.5 395.7,51.5 412.9,51.5 430.0,51.5 447.1,51.5 464.3,51.5 481.4,51.5 498.6,51.5" fill="none" stroke="#89b4fa" stroke-width="2.5" stroke-dasharray="4,4" />
+<circle cx="70.0" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="87.1" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="104.3" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="121.4" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="155.7" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="172.9" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="190.0" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="207.1" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="224.3" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="241.4" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="258.6" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="275.7" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="292.9" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="310.0" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="327.1" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="344.3" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="361.4" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="378.6" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="395.7" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="412.9" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="430.0" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="447.1" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="464.3" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="481.4" cy="51.5" r="3" fill="#89b4fa"/>
+<circle cx="498.6" cy="51.5" r="3" fill="#89b4fa"/>
+<line x1="480" y1="45" x2="500" y2="45" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="490" cy="45" r="3" fill="#89b4fa"/>
+<text x="505" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">Flat (AWGN)</text>
+<line x1="480" y1="63" x2="500" y2="63" stroke="#89b4fa" stroke-width="2.5" stroke-dasharray="8,4" />
+<circle cx="490" cy="63" r="3" fill="#89b4fa"/>
+<text x="505" y="67" fill="#cdd6f4" font-size="11" font-family="sans-serif">Two-Tap</text>
+<line x1="480" y1="81" x2="500" y2="81" stroke="#89b4fa" stroke-width="2.5" stroke-dasharray="4,4" />
+<circle cx="490" cy="81" r="3" fill="#89b4fa"/>
+<text x="505" y="85" fill="#cdd6f4" font-size="11" font-family="sans-serif">TU-6</text>
+</svg>
+
+<!-- ber_chart_b2.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- 64QAM Across All Channels (LMMSE+MMSE)</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+<polyline points="70.0,52.9 87.1,52.9 104.3,54.8 121.4,55.2 138.6,56.5 155.7,57.6 172.9,58.1 190.0,58.1 207.1,59.8 224.3,60.7 241.4,62.8 258.6,65.3 275.7,66.2 292.9,69.9 310.0,70.1 327.1,73.1 344.3,76.3 361.4,84.5 378.6,104.8 395.7,201.9" fill="none" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="70.0" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="87.1" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="104.3" cy="54.8" r="3" fill="#f38ba8"/>
+<circle cx="121.4" cy="55.2" r="3" fill="#f38ba8"/>
+<circle cx="138.6" cy="56.5" r="3" fill="#f38ba8"/>
+<circle cx="155.7" cy="57.6" r="3" fill="#f38ba8"/>
+<circle cx="172.9" cy="58.1" r="3" fill="#f38ba8"/>
+<circle cx="190.0" cy="58.1" r="3" fill="#f38ba8"/>
+<circle cx="207.1" cy="59.8" r="3" fill="#f38ba8"/>
+<circle cx="224.3" cy="60.7" r="3" fill="#f38ba8"/>
+<circle cx="241.4" cy="62.8" r="3" fill="#f38ba8"/>
+<circle cx="258.6" cy="65.3" r="3" fill="#f38ba8"/>
+<circle cx="275.7" cy="66.2" r="3" fill="#f38ba8"/>
+<circle cx="292.9" cy="69.9" r="3" fill="#f38ba8"/>
+<circle cx="310.0" cy="70.1" r="3" fill="#f38ba8"/>
+<circle cx="327.1" cy="73.1" r="3" fill="#f38ba8"/>
+<circle cx="344.3" cy="76.3" r="3" fill="#f38ba8"/>
+<circle cx="361.4" cy="84.5" r="3" fill="#f38ba8"/>
+<circle cx="378.6" cy="104.8" r="3" fill="#f38ba8"/>
+<circle cx="395.7" cy="201.9" r="3" fill="#f38ba8"/>
+<polyline points="70.0,51.6 87.1,51.6 104.3,52.4 121.4,52.4 138.6,52.7 155.7,52.7 172.9,52.9 190.0,52.9 207.1,52.9 224.3,52.9 241.4,52.9 258.6,52.9 275.7,52.9 292.9,52.9 310.0,52.9 327.1,52.9 344.3,52.9 361.4,52.9 378.6,52.9 395.7,52.9 412.9,52.9 430.0,52.9 447.1,52.9 464.3,54.3 481.4,54.5 498.6,54.7" fill="none" stroke="#f38ba8" stroke-width="2.5" stroke-dasharray="8,4" />
+<circle cx="70.0" cy="51.6" r="3" fill="#f38ba8"/>
+<circle cx="87.1" cy="51.6" r="3" fill="#f38ba8"/>
+<circle cx="104.3" cy="52.4" r="3" fill="#f38ba8"/>
+<circle cx="121.4" cy="52.4" r="3" fill="#f38ba8"/>
+<circle cx="138.6" cy="52.7" r="3" fill="#f38ba8"/>
+<circle cx="155.7" cy="52.7" r="3" fill="#f38ba8"/>
+<circle cx="172.9" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="190.0" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="207.1" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="224.3" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="241.4" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="258.6" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="275.7" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="292.9" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="310.0" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="327.1" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="344.3" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="361.4" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="378.6" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="395.7" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="412.9" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="430.0" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="447.1" cy="52.9" r="3" fill="#f38ba8"/>
+<circle cx="464.3" cy="54.3" r="3" fill="#f38ba8"/>
+<circle cx="481.4" cy="54.5" r="3" fill="#f38ba8"/>
+<circle cx="498.6" cy="54.7" r="3" fill="#f38ba8"/>
+<polyline points="70.0,50.9 87.1,50.9 104.3,50.9 121.4,50.9 138.6,50.9 155.7,50.9 172.9,50.9 190.0,50.9 207.1,50.9 224.3,50.9 241.4,50.9 258.6,50.9 275.7,50.9 292.9,51.5 310.0,51.5 327.1,51.5 344.3,51.5 361.4,51.5 378.6,51.5 395.7,51.5 412.9,51.5 430.0,51.5 447.1,51.5 464.3,51.5 481.4,51.5 498.6,51.5" fill="none" stroke="#f38ba8" stroke-width="2.5" stroke-dasharray="4,4" />
+<circle cx="70.0" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="87.1" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="104.3" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="121.4" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="138.6" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="155.7" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="172.9" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="190.0" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="207.1" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="224.3" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="241.4" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="258.6" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="275.7" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="292.9" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="310.0" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="327.1" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="344.3" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="361.4" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="378.6" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="395.7" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="412.9" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="430.0" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="447.1" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="464.3" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="481.4" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="498.6" cy="51.5" r="3" fill="#f38ba8"/>
+<line x1="480" y1="45" x2="500" y2="45" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="490" cy="45" r="3" fill="#f38ba8"/>
+<text x="505" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">Flat (AWGN)</text>
+<line x1="480" y1="63" x2="500" y2="63" stroke="#f38ba8" stroke-width="2.5" stroke-dasharray="8,4" />
+<circle cx="490" cy="63" r="3" fill="#f38ba8"/>
+<text x="505" y="67" fill="#cdd6f4" font-size="11" font-family="sans-serif">Two-Tap</text>
+<line x1="480" y1="81" x2="500" y2="81" stroke="#f38ba8" stroke-width="2.5" stroke-dasharray="4,4" />
+<circle cx="490" cy="81" r="3" fill="#f38ba8"/>
+<text x="505" y="85" fill="#cdd6f4" font-size="11" font-family="sans-serif">TU-6</text>
+</svg>
+
+<!-- ber_chart_b3.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- 256QAM Across All Channels (LMMSE+MMSE)</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+</svg>
+
+
+<h2>Group C: Estimator Comparison</h2>
+<!-- ber_chart_c1.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- QPSK TU-6: Estimator Comparison</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+<polyline points="70.0,51.5 87.1,51.5 104.3,51.5 121.4,51.5 138.6,51.5 155.7,51.5 172.9,51.5 190.0,51.5 207.1,51.5 224.3,51.5 241.4,51.5 258.6,51.5 275.7,51.5 292.9,51.5 310.0,51.5 327.1,51.5 344.3,51.5 361.4,51.5 378.6,51.5 395.7,51.5 412.9,51.5 430.0,51.5 447.1,51.5 464.3,51.5 481.4,51.5 498.6,51.5" fill="none" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="70.0" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="87.1" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="104.3" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="121.4" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="138.6" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="155.7" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="172.9" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="190.0" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="207.1" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="224.3" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="241.4" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="258.6" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="275.7" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="292.9" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="310.0" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="327.1" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="344.3" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="361.4" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="378.6" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="395.7" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="412.9" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="430.0" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="447.1" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="464.3" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="481.4" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="498.6" cy="51.5" r="3" fill="#f38ba8"/>
+<line x1="480" y1="45" x2="500" y2="45" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="490" cy="45" r="3" fill="#f38ba8"/>
+<text x="505" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">LS</text>
+</svg>
+
+<!-- ber_chart_c2.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- 64QAM TU-6: Estimator Comparison</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+<polyline points="70.0,50.9 87.1,50.9 104.3,50.9 121.4,50.9 138.6,50.9 155.7,50.9 172.9,50.9 190.0,50.9 207.1,50.9 224.3,50.9 241.4,50.9 258.6,50.9 275.7,50.9 292.9,51.5 310.0,51.5 327.1,51.5 344.3,51.5 361.4,51.5 378.6,51.5 395.7,51.5 412.9,51.5 430.0,51.5 447.1,51.5 464.3,51.5 481.4,51.5 498.6,51.5" fill="none" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="70.0" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="87.1" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="104.3" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="121.4" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="138.6" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="155.7" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="172.9" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="190.0" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="207.1" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="224.3" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="241.4" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="258.6" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="275.7" cy="50.9" r="3" fill="#f38ba8"/>
+<circle cx="292.9" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="310.0" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="327.1" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="344.3" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="361.4" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="378.6" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="395.7" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="412.9" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="430.0" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="447.1" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="464.3" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="481.4" cy="51.5" r="3" fill="#f38ba8"/>
+<circle cx="498.6" cy="51.5" r="3" fill="#f38ba8"/>
+<line x1="480" y1="45" x2="500" y2="45" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="490" cy="45" r="3" fill="#f38ba8"/>
+<text x="505" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">LS</text>
+</svg>
+
+
+<h2>Group D: Cross-Implementation</h2>
+<!-- ber_chart_d1.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- QPSK Flat (AWGN) LMMSE: Python vs Rust vs RTL</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+<polyline points="70.0,57.2 87.1,60.3 104.3,61.6 121.4,62.8 138.6,66.2 155.7,70.9 172.9,76.3 190.0,81.8 207.1,99.8 224.3,107.9 241.4,107.9 258.6,147.9" fill="none" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="70.0" cy="57.2" r="3" fill="#89b4fa"/>
+<circle cx="87.1" cy="60.3" r="3" fill="#89b4fa"/>
+<circle cx="104.3" cy="61.6" r="3" fill="#89b4fa"/>
+<circle cx="121.4" cy="62.8" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="66.2" r="3" fill="#89b4fa"/>
+<circle cx="155.7" cy="70.9" r="3" fill="#89b4fa"/>
+<circle cx="172.9" cy="76.3" r="3" fill="#89b4fa"/>
+<circle cx="190.0" cy="81.8" r="3" fill="#89b4fa"/>
+<circle cx="207.1" cy="99.8" r="3" fill="#89b4fa"/>
+<circle cx="224.3" cy="107.9" r="3" fill="#89b4fa"/>
+<circle cx="241.4" cy="107.9" r="3" fill="#89b4fa"/>
+<circle cx="258.6" cy="147.9" r="3" fill="#89b4fa"/>
+<line x1="480" y1="45" x2="500" y2="45" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="490" cy="45" r="3" fill="#89b4fa"/>
+<text x="505" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">Python</text>
+</svg>
+
+<!-- ber_chart_d2.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- 64QAM Flat (AWGN) LMMSE: Python vs Rust vs RTL</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+<polyline points="70.0,52.9 87.1,52.9 104.3,54.8 121.4,55.2 138.6,56.5 155.7,57.6 172.9,58.1 190.0,58.1 207.1,59.8 224.3,60.7 241.4,62.8 258.6,65.3 275.7,66.2 292.9,69.9 310.0,70.1 327.1,73.1 344.3,76.3 361.4,84.5 378.6,104.8 395.7,201.9" fill="none" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="70.0" cy="52.9" r="3" fill="#89b4fa"/>
+<circle cx="87.1" cy="52.9" r="3" fill="#89b4fa"/>
+<circle cx="104.3" cy="54.8" r="3" fill="#89b4fa"/>
+<circle cx="121.4" cy="55.2" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="56.5" r="3" fill="#89b4fa"/>
+<circle cx="155.7" cy="57.6" r="3" fill="#89b4fa"/>
+<circle cx="172.9" cy="58.1" r="3" fill="#89b4fa"/>
+<circle cx="190.0" cy="58.1" r="3" fill="#89b4fa"/>
+<circle cx="207.1" cy="59.8" r="3" fill="#89b4fa"/>
+<circle cx="224.3" cy="60.7" r="3" fill="#89b4fa"/>
+<circle cx="241.4" cy="62.8" r="3" fill="#89b4fa"/>
+<circle cx="258.6" cy="65.3" r="3" fill="#89b4fa"/>
+<circle cx="275.7" cy="66.2" r="3" fill="#89b4fa"/>
+<circle cx="292.9" cy="69.9" r="3" fill="#89b4fa"/>
+<circle cx="310.0" cy="70.1" r="3" fill="#89b4fa"/>
+<circle cx="327.1" cy="73.1" r="3" fill="#89b4fa"/>
+<circle cx="344.3" cy="76.3" r="3" fill="#89b4fa"/>
+<circle cx="361.4" cy="84.5" r="3" fill="#89b4fa"/>
+<circle cx="378.6" cy="104.8" r="3" fill="#89b4fa"/>
+<circle cx="395.7" cy="201.9" r="3" fill="#89b4fa"/>
+<line x1="480" y1="45" x2="500" y2="45" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="490" cy="45" r="3" fill="#89b4fa"/>
+<text x="505" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">Python</text>
+</svg>
+
+<!-- ber_chart_d3.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" style="max-width:700px;">
+<rect width="700" height="400" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="600" height="320" fill="#1e1e2e" stroke="#313244"/>
+<text x="350" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- 256QAM TU-6 LMMSE: Python vs Rust vs RTL</text>
+<line x1="70" y1="30" x2="670" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="94" x2="670" y2="94" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="98" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="158" x2="670" y2="158" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="162" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="222" x2="670" y2="222" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="226" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="286" x2="670" y2="286" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="290" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="350" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="354" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="156" y1="30" x2="156" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="156" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="241" y1="30" x2="241" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="241" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="327" y1="30" x2="327" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="327" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="413" y1="30" x2="413" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="499" y1="30" x2="499" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="499" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="584" y1="30" x2="584" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="584" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="670" y1="30" x2="670" y2="350" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+</svg>
+
+</body>
+</html>

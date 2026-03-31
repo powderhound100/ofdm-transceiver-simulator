@@ -191,7 +191,8 @@ TB_LOOPBACK   := $(TB_DIR)/tb_ofdm_loopback.sv
         tb_cp_removal tb_fft tb_demux tb_ch_est tb_eq tb_demap tb_frame \
         tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux \
         tb_noise_est tb_sym_sync tb_cfo_corr \
-        tb_ofdm_tx tb_ofdm_rx tb_loopback
+        tb_ofdm_tx tb_ofdm_rx tb_loopback \
+        tb_ldpc_sweep
 
 # =============================================================================
 # Aggregate targets
@@ -431,6 +432,15 @@ tb_loopback: tb_ofdm_loopback.vvp
 
 tb_ofdm_loopback.vvp: $(TB_LOOPBACK) $(RTL_LOOPBACK_ALL)
 	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+# =============================================================================
+# BER Sweep Co-Simulation Testbench
+# =============================================================================
+tb_ldpc_sweep: tb_ldpc_sweep.vvp
+	$(VVP) $<
+
+tb_ldpc_sweep.vvp: $(TB_DIR)/tb_ldpc_sweep.sv $(RTL_LDPC_ALL)
+	$(IVERILOG) $(IVFLAGS) -o $@ $(RTL_LDPC_ALL) $(TB_DIR)/tb_ldpc_sweep.sv
 
 # =============================================================================
 # Verilator targets (lint check)

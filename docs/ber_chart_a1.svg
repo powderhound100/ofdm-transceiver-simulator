@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" style="max-width:900px;">
+<rect width="900" height="500" fill="#181825" rx="8"/>
+<rect x="70" y="30" width="800" height="420" fill="#1e1e2e" stroke="#313244"/>
+<text x="450" y="20" text-anchor="middle" fill="#cdd6f4" font-size="14" font-family="sans-serif" font-weight="bold">BER vs Eb/N0 -- Flat Channel, All Modulations (LMMSE+MMSE)</text>
+<line x1="70" y1="30" x2="870" y2="30" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="34" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e0</text>
+<line x1="70" y1="114" x2="870" y2="114" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="118" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-1</text>
+<line x1="70" y1="198" x2="870" y2="198" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="202" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-2</text>
+<line x1="70" y1="282" x2="870" y2="282" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="286" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-3</text>
+<line x1="70" y1="366" x2="870" y2="366" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="370" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-4</text>
+<line x1="70" y1="450" x2="870" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="62" y="454" text-anchor="end" fill="#a6adc8" font-size="11" font-family="monospace">1e-5</text>
+<line x1="70" y1="30" x2="70" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="70" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">-5</text>
+<line x1="184" y1="30" x2="184" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="184" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">0</text>
+<line x1="299" y1="30" x2="299" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="299" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">5</text>
+<line x1="413" y1="30" x2="413" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="413" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">10</text>
+<line x1="527" y1="30" x2="527" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="527" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">15</text>
+<line x1="641" y1="30" x2="641" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="641" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">20</text>
+<line x1="756" y1="30" x2="756" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="756" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">25</text>
+<line x1="870" y1="30" x2="870" y2="450" stroke="#313244" stroke-dasharray="4,4"/>
+<text x="870" y="466" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
+<text x="450" y="495" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
+<text x="15" y="240" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,240)">Bit Error Rate</text>
+<polyline points="70.0,73.5 81.4,75.5 92.9,76.2 104.3,77.0 115.7,79.6 127.1,80.7 138.6,84.1 150.0,84.1 161.4,88.5 172.9,91.0 184.3,100.9 195.7,110.4 207.1,146.0 218.6,187.0" fill="none" stroke="#a6e3a1" stroke-width="2.5" />
+<circle cx="70.0" cy="73.5" r="3" fill="#a6e3a1"/>
+<circle cx="81.4" cy="75.5" r="3" fill="#a6e3a1"/>
+<circle cx="92.9" cy="76.2" r="3" fill="#a6e3a1"/>
+<circle cx="104.3" cy="77.0" r="3" fill="#a6e3a1"/>
+<circle cx="115.7" cy="79.6" r="3" fill="#a6e3a1"/>
+<circle cx="127.1" cy="80.7" r="3" fill="#a6e3a1"/>
+<circle cx="138.6" cy="84.1" r="3" fill="#a6e3a1"/>
+<circle cx="150.0" cy="84.1" r="3" fill="#a6e3a1"/>
+<circle cx="161.4" cy="88.5" r="3" fill="#a6e3a1"/>
+<circle cx="172.9" cy="91.0" r="3" fill="#a6e3a1"/>
+<circle cx="184.3" cy="100.9" r="3" fill="#a6e3a1"/>
+<circle cx="195.7" cy="110.4" r="3" fill="#a6e3a1"/>
+<circle cx="207.1" cy="146.0" r="3" fill="#a6e3a1"/>
+<circle cx="218.6" cy="187.0" r="3" fill="#a6e3a1"/>
+<polyline points="70.0,65.7 92.9,69.7 115.7,71.5 138.6,73.0 161.4,77.5 184.3,83.7 207.1,90.7 230.0,97.9 252.9,121.6 275.7,132.2 298.6,132.2 321.4,184.7" fill="none" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="70.0" cy="65.7" r="3" fill="#89b4fa"/>
+<circle cx="92.9" cy="69.7" r="3" fill="#89b4fa"/>
+<circle cx="115.7" cy="71.5" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="73.0" r="3" fill="#89b4fa"/>
+<circle cx="161.4" cy="77.5" r="3" fill="#89b4fa"/>
+<circle cx="184.3" cy="83.7" r="3" fill="#89b4fa"/>
+<circle cx="207.1" cy="90.7" r="3" fill="#89b4fa"/>
+<circle cx="230.0" cy="97.9" r="3" fill="#89b4fa"/>
+<circle cx="252.9" cy="121.6" r="3" fill="#89b4fa"/>
+<circle cx="275.7" cy="132.2" r="3" fill="#89b4fa"/>
+<circle cx="298.6" cy="132.2" r="3" fill="#89b4fa"/>
+<circle cx="321.4" cy="184.7" r="3" fill="#89b4fa"/>
+<polyline points="70.0,62.1 92.9,64.0 115.7,64.5 138.6,66.5 161.4,67.7 184.3,70.5 207.1,72.5 230.0,73.5 252.9,77.7 275.7,80.1 298.6,81.5 321.4,89.4 344.3,107.5 367.1,111.9 390.0,148.3" fill="none" stroke="#f9e2af" stroke-width="2.5" />
+<circle cx="70.0" cy="62.1" r="3" fill="#f9e2af"/>
+<circle cx="92.9" cy="64.0" r="3" fill="#f9e2af"/>
+<circle cx="115.7" cy="64.5" r="3" fill="#f9e2af"/>
+<circle cx="138.6" cy="66.5" r="3" fill="#f9e2af"/>
+<circle cx="161.4" cy="67.7" r="3" fill="#f9e2af"/>
+<circle cx="184.3" cy="70.5" r="3" fill="#f9e2af"/>
+<circle cx="207.1" cy="72.5" r="3" fill="#f9e2af"/>
+<circle cx="230.0" cy="73.5" r="3" fill="#f9e2af"/>
+<circle cx="252.9" cy="77.7" r="3" fill="#f9e2af"/>
+<circle cx="275.7" cy="80.1" r="3" fill="#f9e2af"/>
+<circle cx="298.6" cy="81.5" r="3" fill="#f9e2af"/>
+<circle cx="321.4" cy="89.4" r="3" fill="#f9e2af"/>
+<circle cx="344.3" cy="107.5" r="3" fill="#f9e2af"/>
+<circle cx="367.1" cy="111.9" r="3" fill="#f9e2af"/>
+<circle cx="390.0" cy="148.3" r="3" fill="#f9e2af"/>
+<polyline points="70.0,60.0 92.9,60.0 115.7,62.6 138.6,63.1 161.4,64.7 184.3,66.2 207.1,66.8 230.0,66.8 252.9,69.1 275.7,70.3 298.6,73.0 321.4,76.3 344.3,77.5 367.1,82.4 390.0,82.6 412.9,86.6 435.7,90.7 458.6,101.5 481.4,128.1 504.3,255.7" fill="none" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="70.0" cy="60.0" r="3" fill="#f38ba8"/>
+<circle cx="92.9" cy="60.0" r="3" fill="#f38ba8"/>
+<circle cx="115.7" cy="62.6" r="3" fill="#f38ba8"/>
+<circle cx="138.6" cy="63.1" r="3" fill="#f38ba8"/>
+<circle cx="161.4" cy="64.7" r="3" fill="#f38ba8"/>
+<circle cx="184.3" cy="66.2" r="3" fill="#f38ba8"/>
+<circle cx="207.1" cy="66.8" r="3" fill="#f38ba8"/>
+<circle cx="230.0" cy="66.8" r="3" fill="#f38ba8"/>
+<circle cx="252.9" cy="69.1" r="3" fill="#f38ba8"/>
+<circle cx="275.7" cy="70.3" r="3" fill="#f38ba8"/>
+<circle cx="298.6" cy="73.0" r="3" fill="#f38ba8"/>
+<circle cx="321.4" cy="76.3" r="3" fill="#f38ba8"/>
+<circle cx="344.3" cy="77.5" r="3" fill="#f38ba8"/>
+<circle cx="367.1" cy="82.4" r="3" fill="#f38ba8"/>
+<circle cx="390.0" cy="82.6" r="3" fill="#f38ba8"/>
+<circle cx="412.9" cy="86.6" r="3" fill="#f38ba8"/>
+<circle cx="435.7" cy="90.7" r="3" fill="#f38ba8"/>
+<circle cx="458.6" cy="101.5" r="3" fill="#f38ba8"/>
+<circle cx="481.4" cy="128.1" r="3" fill="#f38ba8"/>
+<circle cx="504.3" cy="255.7" r="3" fill="#f38ba8"/>
+<line x1="680" y1="45" x2="700" y2="45" stroke="#a6e3a1" stroke-width="2.5" />
+<circle cx="690" cy="45" r="3" fill="#a6e3a1"/>
+<text x="705" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">BPSK</text>
+<line x1="680" y1="63" x2="700" y2="63" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="690" cy="63" r="3" fill="#89b4fa"/>
+<text x="705" y="67" fill="#cdd6f4" font-size="11" font-family="sans-serif">QPSK</text>
+<line x1="680" y1="81" x2="700" y2="81" stroke="#f9e2af" stroke-width="2.5" />
+<circle cx="690" cy="81" r="3" fill="#f9e2af"/>
+<text x="705" y="85" fill="#cdd6f4" font-size="11" font-family="sans-serif">16QAM</text>
+<line x1="680" y1="99" x2="700" y2="99" stroke="#f38ba8" stroke-width="2.5" />
+<circle cx="690" cy="99" r="3" fill="#f38ba8"/>
+<text x="705" y="103" fill="#cdd6f4" font-size="11" font-family="sans-serif">64QAM</text>
+</svg>
