@@ -14,6 +14,12 @@
 //
 // Bit growth: +1 bit per stage (6 stages), truncated back to W_OUT with
 // rounding after each butterfly.
+//
+// TIMING FIX: Each stage uses a per-stage counter (stg_cnt) that increments
+// on stg_valid[s], ensuring the sel/twiddle/wr_ptr signals are aligned with
+// the data actually flowing through that stage.  The multiply pipeline adds
+// 2 register stages per SDF stage, so a global counter would be misaligned
+// by 2*s cycles at stage s.
 // =============================================================================
 `timescale 1ns / 1ps
 
@@ -39,7 +45,7 @@ module fft_64pt #(
 );
 
     // =========================================================================
-    // Global sample counter (0..63) — drives all stages
+    // Global sample counter (0..63) — kept for bit-reverse addressing only
     // =========================================================================
     reg [5:0] sample_cnt;
     reg       cnt_active;
@@ -88,13 +94,28 @@ module fft_64pt #(
             localparam integer DELAY_DEPTH = (1 << (5 - s));  // 32, 16, 8, 4, 2, 1
             localparam integer BIT_SEL     = 5 - s;           // counter bit to check
 
+            // =================================================================
+            // Per-stage counter: increments on stg_valid[s] so it is
+            // naturally aligned with data arriving at this stage.
+            // Stage 0 sees stg_valid[0] = s_valid  -> same as sample_cnt.
+            // Stage 1 sees stg_valid[1] which fires 2 cycles later, etc.
+            // =================================================================
+            reg [5:0] stg_cnt;
+
+            always @(posedge clk or negedge rst_n) begin
+                if (!rst_n)
+                    stg_cnt <= 6'd0;
+                else if (stg_valid[s])
+                    stg_cnt <= stg_cnt + 6'd1;
+            end
+
             // Delay line memory (shift register)
             reg signed [WD-1:0] delay_re [0:DELAY_DEPTH-1];
             reg signed [WD-1:0] delay_im [0:DELAY_DEPTH-1];
             reg [5:0] wr_ptr;
 
-            // Butterfly input/output
-            wire                 sel = sample_cnt[BIT_SEL];  // 0=store, 1=butterfly
+            // Butterfly input/output — sel derived from stage-local counter
+            wire                 sel = stg_cnt[BIT_SEL];  // 0=store, 1=butterfly
             wire signed [WD-1:0] in_re = stg_re[s];
             wire signed [WD-1:0] in_im = stg_im[s];
 
@@ -133,31 +154,29 @@ module fft_64pt #(
                               (dif_im_w < $signed({{2{1'b1}}, {(WD-1){1'b0}}})) ? {1'b1, {(WD-1){1'b0}}} :
                               dif_im_w[WD-1:0];
 
-            // ---- Twiddle address computation ----
+            // ---- Twiddle address computation (uses stage-local counter) ----
             // For stage s, the twiddle index is:
-            //   tw_addr = (sample_cnt % (2*DELAY_DEPTH)) * (N / (2*DELAY_DEPTH)) / 2
-            // Simplified: tw_addr = sample_cnt[BIT_SEL-1:0] * 2^s (for s>0)
+            //   tw_addr = lower BIT_SEL bits of stg_cnt, shifted left by s
             // At stage s, twiddle exponent = k * 2^s where k is the sub-counter
-            // For stage 0 (DELAY=32): tw_idx = sample_cnt[4:0] * 1
-            // For stage 1 (DELAY=16): tw_idx = sample_cnt[3:0] * 2
-            // For stage 2 (DELAY=8):  tw_idx = sample_cnt[2:0] * 4
-            // For stage 3 (DELAY=4):  tw_idx = sample_cnt[1:0] * 8
-            // For stage 4 (DELAY=2):  tw_idx = sample_cnt[0]   * 16
+            // For stage 0 (DELAY=32): tw_idx = stg_cnt[4:0] * 1
+            // For stage 1 (DELAY=16): tw_idx = stg_cnt[3:0] * 2
+            // For stage 2 (DELAY=8):  tw_idx = stg_cnt[2:0] * 4
+            // For stage 3 (DELAY=4):  tw_idx = stg_cnt[1:0] * 8
+            // For stage 4 (DELAY=2):  tw_idx = stg_cnt[0]   * 16
             // For stage 5 (DELAY=1):  tw_idx = 0 (always W^0 = 1)
             wire [5:0] tw_addr;
 
-            // Compute twiddle address based on stage
-            // The lower BIT_SEL bits of sample_cnt, shifted left by s
+            // Compute twiddle address based on stage using stage-local counter
             if (s == 0) begin : tw_s0
-                assign tw_addr = sample_cnt[4:0];
+                assign tw_addr = stg_cnt[4:0];
             end else if (s == 1) begin : tw_s1
-                assign tw_addr = {sample_cnt[3:0], 1'b0};
+                assign tw_addr = {stg_cnt[3:0], 1'b0};
             end else if (s == 2) begin : tw_s2
-                assign tw_addr = {sample_cnt[2:0], 2'b00};
+                assign tw_addr = {stg_cnt[2:0], 2'b00};
             end else if (s == 3) begin : tw_s3
-                assign tw_addr = {sample_cnt[1:0], 3'b000};
+                assign tw_addr = {stg_cnt[1:0], 3'b000};
             end else if (s == 4) begin : tw_s4
-                assign tw_addr = {sample_cnt[0], 4'b0000};
+                assign tw_addr = {stg_cnt[0], 4'b0000};
             end else begin : tw_s5
                 assign tw_addr = 6'd0;
             end
@@ -249,6 +268,7 @@ module fft_64pt #(
             end
 
             // Update delay line: store sum when sel=1, store input when sel=0
+            // Uses stage-local counter for synchronized wr_ptr
             integer idx;
             always @(posedge clk or negedge rst_n) begin
                 if (!rst_n) begin
