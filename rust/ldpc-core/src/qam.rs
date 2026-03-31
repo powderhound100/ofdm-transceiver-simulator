@@ -75,17 +75,7 @@ pub fn qam_demap_soft(symbols: &[(f64, f64)], noise_var: f64, constellation: &Co
     let n_sym = symbols.len();
     let mut llr = vec![0.0f64; n_sym * bps];
 
-    // QPSK fast path
-    if bps == 2 {
-        let scale = 2.0 * std::f64::consts::SQRT_2 / nv;
-        for (i, &(re, im)) in symbols.iter().enumerate() {
-            llr[i * 2] = scale * re;
-            llr[i * 2 + 1] = scale * im;
-        }
-        return llr;
-    }
-
-    // General max-log-MAP
+    // General max-log-MAP (used for all modulations including QPSK)
     let pts = &constellation.points;
     let n_pts = pts.len();
 

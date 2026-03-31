@@ -32,4 +32,26 @@
 <text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
 <text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
 <text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
+<polyline points="70.0,53.9 104.3,53.9 138.6,54.7 172.9,55.2 207.1,57.8 241.4,58.6 275.7,60.9 310.0,61.6 344.3,63.7 378.6,68.1 412.9,68.8 447.1,71.9 481.4,76.1 515.7,77.0 550.0,77.0 584.3,80.0 618.6,85.5 652.9,86.8" fill="none" stroke="#cba6f7" stroke-width="2.5" />
+<circle cx="70.0" cy="53.9" r="3" fill="#cba6f7"/>
+<circle cx="104.3" cy="53.9" r="3" fill="#cba6f7"/>
+<circle cx="138.6" cy="54.7" r="3" fill="#cba6f7"/>
+<circle cx="172.9" cy="55.2" r="3" fill="#cba6f7"/>
+<circle cx="207.1" cy="57.8" r="3" fill="#cba6f7"/>
+<circle cx="241.4" cy="58.6" r="3" fill="#cba6f7"/>
+<circle cx="275.7" cy="60.9" r="3" fill="#cba6f7"/>
+<circle cx="310.0" cy="61.6" r="3" fill="#cba6f7"/>
+<circle cx="344.3" cy="63.7" r="3" fill="#cba6f7"/>
+<circle cx="378.6" cy="68.1" r="3" fill="#cba6f7"/>
+<circle cx="412.9" cy="68.8" r="3" fill="#cba6f7"/>
+<circle cx="447.1" cy="71.9" r="3" fill="#cba6f7"/>
+<circle cx="481.4" cy="76.1" r="3" fill="#cba6f7"/>
+<circle cx="515.7" cy="77.0" r="3" fill="#cba6f7"/>
+<circle cx="550.0" cy="77.0" r="3" fill="#cba6f7"/>
+<circle cx="584.3" cy="80.0" r="3" fill="#cba6f7"/>
+<circle cx="618.6" cy="85.5" r="3" fill="#cba6f7"/>
+<circle cx="652.9" cy="86.8" r="3" fill="#cba6f7"/>
+<line x1="480" y1="45" x2="500" y2="45" stroke="#cba6f7" stroke-width="2.5" />
+<circle cx="490" cy="45" r="3" fill="#cba6f7"/>
+<text x="505" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">Flat (AWGN)</text>
 </svg>

@@ -32,19 +32,11 @@
 <text x="670" y="366" text-anchor="middle" fill="#a6adc8" font-size="11" font-family="monospace">30</text>
 <text x="350" y="395" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif">Eb/N0 (dB)</text>
 <text x="15" y="190" text-anchor="middle" fill="#cdd6f4" font-size="12" font-family="sans-serif" transform="rotate(-90,15,190)">Bit Error Rate</text>
-<polyline points="70.0,57.2 87.1,60.3 104.3,61.6 121.4,62.8 138.6,66.2 155.7,70.9 172.9,76.3 190.0,81.8 207.1,99.8 224.3,107.9 241.4,107.9 258.6,147.9" fill="none" stroke="#89b4fa" stroke-width="2.5" />
-<circle cx="70.0" cy="57.2" r="3" fill="#89b4fa"/>
-<circle cx="87.1" cy="60.3" r="3" fill="#89b4fa"/>
-<circle cx="104.3" cy="61.6" r="3" fill="#89b4fa"/>
-<circle cx="121.4" cy="62.8" r="3" fill="#89b4fa"/>
-<circle cx="138.6" cy="66.2" r="3" fill="#89b4fa"/>
-<circle cx="155.7" cy="70.9" r="3" fill="#89b4fa"/>
-<circle cx="172.9" cy="76.3" r="3" fill="#89b4fa"/>
-<circle cx="190.0" cy="81.8" r="3" fill="#89b4fa"/>
-<circle cx="207.1" cy="99.8" r="3" fill="#89b4fa"/>
-<circle cx="224.3" cy="107.9" r="3" fill="#89b4fa"/>
-<circle cx="241.4" cy="107.9" r="3" fill="#89b4fa"/>
-<circle cx="258.6" cy="147.9" r="3" fill="#89b4fa"/>
+<polyline points="70.0,59.4 104.3,62.2 138.6,68.6 172.9,81.9" fill="none" stroke="#89b4fa" stroke-width="2.5" />
+<circle cx="70.0" cy="59.4" r="3" fill="#89b4fa"/>
+<circle cx="104.3" cy="62.2" r="3" fill="#89b4fa"/>
+<circle cx="138.6" cy="68.6" r="3" fill="#89b4fa"/>
+<circle cx="172.9" cy="81.9" r="3" fill="#89b4fa"/>
 <line x1="480" y1="45" x2="500" y2="45" stroke="#89b4fa" stroke-width="2.5" />
 <circle cx="490" cy="45" r="3" fill="#89b4fa"/>
 <text x="505" y="49" fill="#cdd6f4" font-size="11" font-family="sans-serif">Python</text>

@@ -61,10 +61,7 @@ def qam_map(bits: np.ndarray, modulation: str = "QPSK") -> np.ndarray:
 
 def qam_demap_soft(symbols: np.ndarray, noise_var: float,
                    modulation: str = "QPSK") -> np.ndarray:
-    """Soft QAM demapping to LLR values.
-
-    For QPSK, this reduces to simple real/imag scaling.
-    For higher-order QAM, uses max-log-MAP approximation.
+    """Soft QAM demapping to LLR values (max-log-MAP approximation).
 
     Returns float64 LLR array (positive = bit 0 more likely).
     """
@@ -73,18 +70,7 @@ def qam_demap_soft(symbols: np.ndarray, noise_var: float,
     if noise_var <= 0:
         noise_var = 1e-10
 
-    if modulation == "QPSK":
-        # QPSK decomposes to two independent BPSK channels
-        scale = 2.0 * np.sqrt(2) / noise_var
-        llr_i = scale * symbols.real.astype(np.float64)
-        llr_q = scale * symbols.imag.astype(np.float64)
-        # Interleave: [I0, Q0, I1, Q1, ...]
-        llr = np.empty(len(symbols) * 2, dtype=np.float64)
-        llr[0::2] = llr_i
-        llr[1::2] = llr_q
-        return llr
-
-    # Max-log-MAP for higher-order QAM
+    # Vectorized max-log-MAP for all modulations
     constellation = CONSTELLATIONS[modulation]
     n_symbols = len(symbols)
     llr = np.empty(n_symbols * bps, dtype=np.float64)
