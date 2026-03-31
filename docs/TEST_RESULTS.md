@@ -11,7 +11,7 @@
 | Python Reference (P1-P6) | 20 | 20 | 0 | PASS |
 | Rust Port (R1-R5) | 11 | 11 | 0 | PASS |
 | Cross-validation (Python vs Rust) | 4 | 4 | 0 | PASS (bit-exact) |
-| FPGA RTL (F1-F12) | — | — | — | Awaiting Icarus Verilog |
+| FPGA RTL (31 testbenches) | 107+ | — | — | Awaiting Icarus Verilog (see inventory below) |
 
 All three implementations agree on identical decoded output for all 4 test SNR points. The Python-to-Rust contract (bit-exact match on identical f32 inputs) is fully verified.
 
@@ -228,52 +228,81 @@ The Rust BER curve closely tracks Python's (same waterfall knee at 1.0-1.5 dB, s
 
 | Category | Files | Total Lines |
 |----------|-------|-------------|
-| RTL modules | 12 | 1,771 |
-| Testbenches | 5 | 1,282 |
-| Sim infrastructure | 2 | — |
-| **Total** | **19** | **3,053** |
+| RTL modules | 44 | ~8,300 |
+| Testbenches | 31 | ~6,200 |
+| Sim infrastructure (Makefile) | 1 | 447 |
+| **Total** | **76** | **~14,950** |
 
-### RTL Architecture
+### Subsystem Breakdown
+
+| Subsystem | Modules | Lines | Top-Level | Description |
+|-----------|---------|-------|-----------|-------------|
+| LDPC Decoder | 12 | 1,945 | ldpc_top.sv | NMS α=0.75, 6-bit, 20 max iterations |
+| Channel Model | 7+2 | 2,179 | channel_model_top.sv | Sparse + 4 dense FIR, AWGN, 3 profiles |
+| OFDM Receiver | 10+2 | 2,155 | ofdm_rx_top.sv | SDF FFT, LS/MMSE EQ, soft demapping |
+| OFDM Transmitter | 6 | 1,133 | ofdm_tx_top.sv | LDPC encode, QAM, IFFT, CP insertion |
+| Sync / Estimation | 4 | 627 | standalone | Schmidl-Cox, CFO NCO, noise variance |
+| Integration | 1 | 346 | ofdm_loopback_top.sv | Full TX→CH→RX→LDPC with BER counter |
+
+### RTL Architecture — Full Signal Chain
 
 ```
-                    +------------------+
-  LLR in --------->| llr_input_buffer |----+
-  (AXI-S)          +------------------+    |
-                                           v
-  +------------------+    +-----------+   +-----------+
-  | base_matrix_rom  |--->| barrel    |-->| check     |
-  | (shift values)   |    | shifter   |   | node unit |
-  +------------------+    +-----------+   +-----------+
-                                               |
-                            +-----------+      |  c2v messages
-                            | message   |<-----+
-                            | ram       |
-                            +-----------+
-                                 |
-                            +-----------+   +-----------+
-                            | variable  |-->| syndrome  |
-                            | node unit |   | checker   |
-                            +-----------+   +-----------+
-                                 |               |
-                            +-----------+   converged?
-                            | output    |      |
-  decoded out <-------------|  buffer   |   +----------+
-  (AXI-S)                   +-----------+   | iter     |
-                                            | ctrl FSM |
-                                            +----------+
+Info bits ──→ [ldpc_encoder] ──→ [qam_mapper] ──→ [subcarrier_mux]
+             ──→ [ifft_64pt] ──→ [cp_insertion] ──→ TX IQ
+
+TX IQ ──→ [channel_fir_sparse] ──→ [awgn_generator] ──→ RX IQ
+
+RX IQ ──→ [cp_removal] ──→ [fft_64pt] ──→ [subcarrier_demux]
+      ├─ pilots ──→ [channel_estimator] ─────────────────┐
+      └─ data   ──→ [data_align_buffer] ──→ [equalizer] ←┘
+             ──→ [soft_demapper] ──→ [frame_controller] ──→ LLR
+
+LLR ──→ [ldpc_top] (iter_ctrl, CNU, VNU, syndrome, msg_ram) ──→ Decoded bits
 ```
 
-### Testbench Status
+### All 31 Testbenches — Status
 
-| Testbench | Target | Status |
-|-----------|--------|--------|
-| tb_barrel_shifter | All shift values 0..Z-1 | Written, awaiting Icarus |
-| tb_min2_finder | 6 test cases (basic, edge cases) | Written, awaiting Icarus |
-| tb_check_node_unit | Known v2c patterns -> verify c2v | Written, awaiting Icarus |
-| tb_variable_node_unit | Channel LLR + c2v -> verify posterior | Written, awaiting Icarus |
-| tb_ldpc_top | End-to-end with $readmemh test vectors | Written, awaiting Icarus |
+**All testbenches require Icarus Verilog (`iverilog`). Run `cd fpga/sim && make all` once installed.**
 
-**Note:** FPGA testbenches require Icarus Verilog or Verilator, which are not installed on this machine. The RTL is written to be synthesis-clean and simulation-ready. Run `cd fpga/sim && make all` once a simulator is available.
+| # | Testbench | DUT | Tests | Key Checks |
+|---|-----------|-----|-------|------------|
+| **LDPC Decoder (5 TBs)** | | | | |
+| 1 | tb_barrel_shifter | barrel_shifter | 4 (35 checks) | Cyclic shift correctness for all Z=27 positions |
+| 2 | tb_min2_finder | min2_finder | 6 | min1, min2, argmin1 for ascending, edge cases |
+| 3 | tb_check_node_unit | check_node_unit | 2 | c2v magnitude/sign via NMS formula |
+| 4 | tb_variable_node_unit | variable_node_unit | 6 | posterior, v2c, saturation at ±31 |
+| 5 | tb_ldpc_top | ldpc_top | 2 | Noiseless: 1 iter/0 BER, Clean: ~12 iter/0 BER |
+| **Channel Model (8 TBs)** | | | | |
+| 6 | tb_channel_fir_sparse | channel_fir_sparse | 4 | Impulse, flat, 2-tap, energy ratio 0.80–1.15 |
+| 7 | tb_channel_fir_dense32 | channel_fir_dense32 | 4 | Same 4-test pattern |
+| 8 | tb_channel_fir_dense64 | channel_fir_dense64 | 4 | Same 4-test pattern |
+| 9 | tb_channel_fir_dense128 | channel_fir_dense128 | 4 | Same 4-test pattern |
+| 10 | tb_channel_fir_dense256 | channel_fir_dense256 | 4 | Same 4-test pattern |
+| 11 | tb_fir_compare | all 5 FIR variants | comparative | Latency, max error ≤10, energy |
+| 12 | tb_awgn_generator | awgn_generator | 3 | 50k samples: bias, variance, tail bound |
+| 13 | tb_channel_model_top | channel_model_top | 4 | Bypass, FIR flat, noise only, FIR+noise |
+| **OFDM Receiver (8 TBs)** | | | | |
+| 14 | tb_cp_removal | cp_removal | 4 | 80→64 samples, back-to-back, backpressure |
+| 15 | tb_fft_64pt | fft_64pt | 3 (65 checks) | DC, impulse, single tone ±100 tolerance |
+| 16 | tb_subcarrier_demux | subcarrier_demux | 2 | 4 pilots, 48 data, 12 guards |
+| 17 | tb_channel_estimator | channel_estimator | 4 (192 checks) | Flat, atten, phase, freq-selective |
+| 18 | tb_equalizer | equalizer | 5 | ZF division, saturation ±2 tolerance |
+| 19 | tb_soft_demapper | soft_demapper | 5 | QPSK quadrants, scaling, saturation ±31 |
+| 20 | tb_frame_controller | frame_controller | 3 | 648 LLR buffering, m_tlast, multi-frame |
+| 21 | tb_ofdm_rx_top | ofdm_rx_top | 2 | 560 IQ→648 LLR, sign exact, mag ±2 |
+| **OFDM Transmitter (6 TBs)** | | | | |
+| 22 | tb_ldpc_encoder | ldpc_encoder | 4 | All-zero, alternating, m_tlast, parity |
+| 23 | tb_qam_mapper | qam_mapper | 4 | QPSK constellation ±11585 |
+| 24 | tb_cp_insertion | cp_insertion | 2 (81 checks) | CP=[48..63], data=[0..63], 80 samples |
+| 25 | tb_ifft_64pt | ifft_64pt | 3 (194 checks) | DC flat, bin-4 cosine, impulse ±20 |
+| 26 | tb_subcarrier_mux | subcarrier_mux | 3 | Data+pilot+guard, back-to-back |
+| 27 | tb_ofdm_tx_top | ofdm_tx_top | 3 | 324 bits→560 IQ ±100, framing |
+| **Sync / Estimation (3 TBs)** | | | | |
+| 28 | tb_noise_estimator | noise_estimator | 3 | Zero noise, known offset, Q8.8 output |
+| 29 | tb_symbol_sync | symbol_sync | 2 | CP detection ≥1 pulse, ≤2 spurious |
+| 30 | tb_cfo_corrector | cfo_corrector | 3 | Passthrough, rotation, CFO cancellation |
+| **Integration (1 TB)** | | | | |
+| 31 | tb_ofdm_loopback | ofdm_loopback_top | 2 | **End-to-end BER=0** (noiseless flat) |
 
 ---
 
@@ -283,10 +312,13 @@ This table shows which implementations have been validated against each other:
 
 | Test Vector | Python | Rust | FPGA (6-bit) |
 |-------------|--------|------|-------------|
-| noiseless (inf dB) | generated | bit-exact PASS | awaiting sim |
-| clean (+2.0 dB) | generated | bit-exact PASS | awaiting sim |
-| waterfall (-0.5 dB) | generated | bit-exact PASS | awaiting sim |
-| high_noise (-2.0 dB) | generated | bit-exact PASS | awaiting sim |
+| noiseless (inf dB) | generated | bit-exact PASS | awaiting sim (tb_ldpc_top test 1) |
+| clean (+2.0 dB) | generated | bit-exact PASS | awaiting sim (tb_ldpc_top test 2) |
+| waterfall (-0.5 dB) | generated | bit-exact PASS | N/A (6-bit quantization differs) |
+| high_noise (-2.0 dB) | generated | bit-exact PASS | N/A (6-bit quantization differs) |
+| OFDM TX IQ output | generated | N/A | awaiting sim (tb_ofdm_tx_top) |
+| OFDM RX LLR output | generated | N/A | awaiting sim (tb_ofdm_rx_top) |
+| End-to-end loopback | generated | N/A | awaiting sim (tb_ofdm_loopback) |
 
 The "bit-exact" claim means: given identical f32 channel LLRs as input, Python and Rust produce identical decoded bit vectors and identical iteration counts. This holds for both converging and non-converging cases.
 
@@ -350,5 +382,11 @@ cargo bench --bench decoder_bench
 
 # FPGA (requires Icarus Verilog)
 cd fpga/sim
-make all                  # runs all 5 testbenches
+make all                  # runs all 31 testbenches
+make all_ldpc             # LDPC decoder only (5 TBs)
+make all_channel          # channel model (8 TBs)
+make all_ofdm_rx          # OFDM receiver (8 TBs)
+make all_ofdm_tx          # OFDM transmitter (6 TBs)
+make all_sync             # sync/estimation (3 TBs)
+make all_integration      # integration (3 TBs: TX, RX, loopback)
 ```
