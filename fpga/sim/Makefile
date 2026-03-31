@@ -33,6 +33,8 @@
 #     make tb_encoder         — LDPC encoder testbench
 #     make tb_mapper          — QAM mapper testbench
 #     make tb_cp_insert       — CP insertion testbench
+#     make tb_ifft            — 64-point IFFT testbench
+#     make tb_mux             — Subcarrier mux testbench
 #
 #   Aggregate:
 #     make all_ldpc           — All LDPC testbenches
@@ -92,6 +94,11 @@ RTL_AWGN     := $(RTL_LFSR) $(RTL_DIR)/awgn_generator.sv
 RTL_PROF_ROM := $(RTL_DIR)/channel_profile_rom.sv
 RTL_CH_TOP   := $(RTL_DIR)/channel_model_top.sv $(RTL_FIR_SP) $(RTL_AWGN) $(RTL_PROF_ROM)
 
+# --- Sync / Estimation (Phase G) ---
+RTL_NOISE_EST := $(RTL_DIR)/noise_estimator.sv
+RTL_SYM_SYNC  := $(RTL_DIR)/symbol_sync.sv
+RTL_CFO_CORR  := $(RTL_DIR)/cfo_corrector.sv
+
 # --- OFDM Receiver (Phase B) ---
 RTL_CP_REM   := $(RTL_DIR)/cp_removal.sv
 RTL_FFT_BF   := $(RTL_DIR)/fft_butterfly.sv
@@ -148,6 +155,8 @@ TB_FRAME      := $(TB_DIR)/tb_frame_controller.sv
 TB_ENCODER    := $(TB_DIR)/tb_ldpc_encoder.sv
 TB_MAPPER     := $(TB_DIR)/tb_qam_mapper.sv
 TB_CP_INS     := $(TB_DIR)/tb_cp_insertion.sv
+TB_IFFT       := $(TB_DIR)/tb_ifft_64pt.sv
+TB_SUB_MUX    := $(TB_DIR)/tb_subcarrier_mux.sv
 
 # =============================================================================
 # Phony targets
@@ -157,7 +166,7 @@ TB_CP_INS     := $(TB_DIR)/tb_cp_insertion.sv
         tb_fir_sparse tb_fir_dense32 tb_fir_dense64 tb_fir_dense128 tb_fir_dense256 \
         tb_awgn tb_channel_model \
         tb_cp_removal tb_fft tb_demux tb_ch_est tb_eq tb_demap tb_frame \
-        tb_encoder tb_mapper tb_cp_insert
+        tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux
 
 # =============================================================================
 # Aggregate targets
@@ -171,7 +180,7 @@ all_channel: tb_fir_sparse tb_awgn tb_channel_model
 all_ofdm_rx: tb_cp_removal tb_fft tb_demux tb_ch_est tb_eq tb_demap tb_frame
 	@echo "=== All OFDM RX testbenches completed ==="
 
-all_ofdm_tx: tb_encoder tb_mapper tb_cp_insert
+all_ofdm_tx: tb_encoder tb_mapper tb_cp_insert tb_ifft tb_mux
 	@echo "=== All OFDM TX testbenches completed ==="
 
 all: all_ldpc all_channel all_ofdm_rx all_ofdm_tx
@@ -322,6 +331,18 @@ tb_cp_insert: tb_cp_insertion.vvp
 	$(VVP) $<
 
 tb_cp_insertion.vvp: $(TB_CP_INS) $(RTL_CP_INS)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+tb_ifft: tb_ifft_64pt.vvp
+	$(VVP) $<
+
+tb_ifft_64pt.vvp: $(TB_IFFT) $(RTL_IFFT)
+	$(IVERILOG) $(IVFLAGS) -o $@ $^
+
+tb_mux: tb_subcarrier_mux.vvp
+	$(VVP) $<
+
+tb_subcarrier_mux.vvp: $(TB_SUB_MUX) $(RTL_SUB_MUX)
 	$(IVERILOG) $(IVFLAGS) -o $@ $^
 
 # =============================================================================
