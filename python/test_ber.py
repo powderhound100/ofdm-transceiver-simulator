@@ -36,7 +36,7 @@ def run_ber_sweep(snr_range: list[float], num_trials: int = 100,
         total_info_bits = 0
 
         for trial in range(num_trials):
-            seed = base_seed + trial * 1000 + int((snr_db + 10) * 100)
+            seed = base_seed + trial * 1000 + int((snr_db + 50) * 100)
             rng = np.random.default_rng(seed)
 
             info_bits = rng.integers(0, 2, size=code.K, dtype=np.uint8)
