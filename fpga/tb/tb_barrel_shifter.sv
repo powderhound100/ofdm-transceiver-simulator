@@ -36,6 +36,7 @@ module tb_barrel_shifter;
     // Test variables
     int errors;
     int tests;
+    logic [W*Z-1:0] expected;
 
     // Expected output computation
     function automatic logic [W*Z-1:0] expected_shift(
@@ -81,7 +82,6 @@ module tb_barrel_shifter;
             @(posedge clk);  // 2 cycle latency
             @(posedge clk);  // sample output
             begin
-                automatic logic [W*Z-1:0] expected;
                 expected = expected_shift(data_in, s);
                 if (data_out !== expected) begin
                     $display("FAIL: shift=%0d, got=%h, expected=%h", s, data_out, expected);
@@ -104,7 +104,6 @@ module tb_barrel_shifter;
         @(posedge clk);
         @(posedge clk);
         begin
-            automatic logic [W*Z-1:0] expected;
             expected = expected_shift(data_in, 13);
             if (data_out !== expected) begin
                 $display("FAIL: all-ones shift=13");
@@ -130,7 +129,6 @@ module tb_barrel_shifter;
             @(posedge clk);
             @(posedge clk);
             begin
-                automatic logic [W*Z-1:0] expected;
                 expected = expected_shift(data_in, s);
                 if (data_out !== expected) begin
                     $display("FAIL: alternating shift=%0d", s);
@@ -144,15 +142,17 @@ module tb_barrel_shifter;
         // Test 4: Shift by 0 (identity)
         // =====================================================================
         $display("=== Test 4: Shift by 0 ===");
-        for (int i = 0; i < Z; i++)
-            data_in[i*W +: W] = (i * 3)[W-1:0];
+        for (int i = 0; i < Z; i++) begin
+            int tmp;
+            tmp = i * 3;
+            data_in[i*W +: W] = tmp[W-1:0];
+        end
 
         shift_val = 9'd0;
         @(posedge clk);
         @(posedge clk);
         @(posedge clk);
         begin
-            automatic logic [W*Z-1:0] expected;
             expected = expected_shift(data_in, 0);
             if (data_out !== expected) begin
                 $display("FAIL: shift=0");

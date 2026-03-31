@@ -44,6 +44,9 @@ module tb_variable_node_unit;
     // Test infrastructure
     int errors;
     int tests;
+    int fail;
+    logic signed [W-1:0] post_val;
+    logic signed [W-1:0] v2c_val;
 
     // Saturation function for checking
     function automatic logic signed [W-1:0] sat(input int val);
@@ -91,9 +94,8 @@ module tb_variable_node_unit;
         @(posedge clk);
 
         if (valid) begin
-            automatic int fail = 0;
+            fail = 0;
             for (int z = 0; z < Z; z++) begin
-                logic signed [W-1:0] post_val, v2c_val;
                 post_val = posterior_out[z*W +: W];
                 v2c_val  = v2c_out[z*W +: W];
                 if (post_val != 6'sd15) begin
@@ -142,7 +144,6 @@ module tb_variable_node_unit;
         @(posedge clk);
 
         if (valid) begin
-            automatic logic signed [W-1:0] post_val, v2c_val;
             post_val = posterior_out[0*W +: W];
             v2c_val  = v2c_out[0*W +: W];
             if (post_val != 6'sd15 || v2c_val != 6'sd11) begin
@@ -177,7 +178,6 @@ module tb_variable_node_unit;
         @(posedge clk);
 
         if (valid) begin
-            automatic logic signed [W-1:0] post_val, v2c_val;
             post_val = posterior_out[0*W +: W];
             v2c_val  = v2c_out[0*W +: W];
             if (post_val != 6'sd31) begin
@@ -215,7 +215,6 @@ module tb_variable_node_unit;
         @(posedge clk);
 
         if (valid) begin
-            automatic logic signed [W-1:0] post_val, v2c_val;
             post_val = posterior_out[0*W +: W];
             v2c_val  = v2c_out[0*W +: W];
             if (post_val != -6'sd25) begin
@@ -253,7 +252,6 @@ module tb_variable_node_unit;
         @(posedge clk);
 
         if (valid) begin
-            automatic logic signed [W-1:0] post_val, v2c_val;
             post_val = posterior_out[0*W +: W];
             v2c_val  = v2c_out[0*W +: W];
             if (post_val != -6'sd31) begin
@@ -291,9 +289,8 @@ module tb_variable_node_unit;
         @(posedge clk);
 
         if (valid) begin
-            automatic int fail = 0;
+            fail = 0;
             for (int z = 0; z < Z; z++) begin
-                logic signed [W-1:0] post_val, v2c_val;
                 post_val = posterior_out[z*W +: W];
                 v2c_val  = v2c_out[z*W +: W];
                 if (z % 2 == 0) begin

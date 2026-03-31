@@ -47,7 +47,7 @@ module tb_min2_finder;
     int errors;
     int tests;
 
-    task automatic check_result(
+    task check_result(
         input string test_name,
         input logic [MAG_BITS-1:0] exp_min1,
         input logic [MAG_BITS-1:0] exp_min2,

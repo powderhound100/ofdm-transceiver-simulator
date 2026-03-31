@@ -149,6 +149,11 @@ module tb_check_node_unit;
     // Test
     int errors;
     int tests;
+    int edge_cnt;
+    int edge_cols [0:6];
+    int k;
+    int timeout;
+    logic signed [W-1:0] c2v_val;
 
     initial begin
         $dumpfile("tb_check_node_unit.vcd");
@@ -176,9 +181,8 @@ module tb_check_node_unit;
         // =====================================================================
         $display("=== Test: CNU row 0, uniform v2c = +5 ===");
         begin
-            automatic int edge_cnt = 0;
-            automatic int edge_cols[7];
-            automatic int k = 0;
+            edge_cnt = 0;
+            k = 0;
 
             // Find columns with edges in row 0
             for (int c = 0; c < NB; c++) begin
@@ -208,7 +212,7 @@ module tb_check_node_unit;
 
             // Wait for c2v output
             begin
-                automatic int timeout = 50;
+                timeout = 50;
                 while (!c2v_valid && timeout > 0) begin
                     @(posedge clk);
                     timeout--;
@@ -222,7 +226,6 @@ module tb_check_node_unit;
                     // alpha * 5 = 5 - 1 = 4 (0.75 * 5 = 3.75, truncated)
                     // Expected c2v = +4 for all
                     for (int z = 0; z < Z; z++) begin
-                        logic signed [W-1:0] c2v_val;
                         c2v_val = c2v_out[z*W +: W];
                         // Alpha * 5 = 5 - (5>>>2) = 5 - 1 = 4
                         if (c2v_val != 6'sd4 && c2v_val != 6'sd3) begin
@@ -250,7 +253,8 @@ module tb_check_node_unit;
         // =====================================================================
         $display("=== Test 2: CNU row 0, alternating +/-10 ===");
         begin
-            automatic int edge_cols[7] = '{0, 4, 5, 8, 11, 12, 13};
+            edge_cols[0] = 0; edge_cols[1] = 4; edge_cols[2] = 5;
+            edge_cols[3] = 8; edge_cols[4] = 11; edge_cols[5] = 12; edge_cols[6] = 13;
 
             for (int e = 0; e < 7; e++) begin
                 for (int z = 0; z < Z; z++) begin
@@ -273,7 +277,7 @@ module tb_check_node_unit;
             in_valid  = 0;
 
             begin
-                automatic int timeout = 50;
+                timeout = 50;
                 while (!c2v_valid && timeout > 0) begin
                     @(posedge clk);
                     timeout--;

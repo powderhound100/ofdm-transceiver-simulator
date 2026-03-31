@@ -89,6 +89,10 @@ module tb_ldpc_top;
     int errors;
     int total_tests;
     int bit_errors;
+    logic expected_bit;
+
+    // LLR frame to send (used by send_llr_frame task)
+    logic [W-1:0] llr_frame [0:N-1];
 
     // =========================================================================
     // Load test vectors
@@ -102,10 +106,10 @@ module tb_ldpc_top;
     // Tasks
     // =========================================================================
 
-    // Send LLR frame via AXI-Stream
-    task automatic send_llr_frame(input logic [W-1:0] llr_data [0:N-1]);
+    // Send LLR frame via AXI-Stream (reads from module-level llr_frame)
+    task send_llr_frame();
         for (int i = 0; i < N; i++) begin
-            s_tdata  <= llr_data[i];
+            s_tdata  <= llr_frame[i];
             s_tvalid <= 1'b1;
             s_tlast  <= (i == N - 1);
             @(posedge clk);
@@ -116,8 +120,9 @@ module tb_ldpc_top;
     endtask
 
     // Wait for decoding to complete
-    task automatic wait_for_done(input int max_cycles);
-        automatic int cnt = 0;
+    task wait_for_done(input int max_cycles);
+        int cnt;
+        cnt = 0;
         while (!decode_done && cnt < max_cycles) begin
             @(posedge clk);
             cnt++;
@@ -127,8 +132,9 @@ module tb_ldpc_top;
     endtask
 
     // Read decoded bits via AXI-Stream
-    task automatic read_decoded_bits();
-        automatic int idx = 0;
+    task read_decoded_bits();
+        int idx;
+        idx = 0;
         m_tready <= 1'b1;
         while (idx < N) begin
             @(posedge clk);
@@ -168,7 +174,8 @@ module tb_ldpc_top;
         $display("=== Test 1: Noiseless LLR ===");
         $display("  Loading %0d LLR values...", N);
 
-        send_llr_frame(llr_noiseless);
+        for (int i = 0; i < N; i++) llr_frame[i] = llr_noiseless[i];
+        send_llr_frame();
         $display("  LLR loaded, waiting for decode...");
 
         wait_for_done(100000);
@@ -188,7 +195,6 @@ module tb_ldpc_top;
             // Check decoded bits against LLR signs
             bit_errors = 0;
             for (int i = 0; i < N; i++) begin
-                automatic logic expected_bit;
                 // Positive LLR -> bit 0, negative LLR -> bit 1
                 expected_bit = llr_noiseless[i][W-1];  // sign bit
                 if (decoded_bits[i] !== expected_bit)
@@ -219,7 +225,8 @@ module tb_ldpc_top;
         $display("=== Test 2: Clean (2.0 dB) LLR ===");
         $display("  Loading %0d LLR values...", N);
 
-        send_llr_frame(llr_clean);
+        for (int i = 0; i < N; i++) llr_frame[i] = llr_clean[i];
+        send_llr_frame();
         $display("  LLR loaded, waiting for decode...");
 
         wait_for_done(500000);
