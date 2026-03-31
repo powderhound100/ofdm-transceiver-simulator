@@ -11,9 +11,16 @@
 //
 // During CNU_PHASE: sweeps row_block 0..MB-1, for each row sweeps col_block
 //   0..NB-1, skipping columns with no edge (shift_val == 9'h1FF).
+//   Each column uses a FETCH -> WAIT -> PROCESS pipeline to handle
+//   1-cycle ROM read latency.
 //
 // During VNU_PHASE: sweeps col_block 0..NB-1, for each col sweeps row_block
-//   0..MB-1, skipping rows with no edge.
+//   0..MB-1, skipping rows with no edge.  Same FETCH -> WAIT -> PROCESS
+//   pipeline.
+//
+// During SYNDROME_PHASE: sweeps row_block 0..MB-1, for each row sweeps
+//   col_block 0..NB-1, feeding hard-decision bits through the syndrome
+//   checker using first_col/last_col/last_row signals.
 // =============================================================================
 
 module iteration_ctrl #(
@@ -43,19 +50,27 @@ module iteration_ctrl #(
 );
 
     // =========================================================================
-    // State definitions
+    // State definitions (5-bit encoding to accommodate all states)
     // =========================================================================
-    typedef enum logic [3:0] {
-        S_IDLE          = 4'd0,
-        S_CNU_FETCH     = 4'd1,   // ROM fetch latency
-        S_CNU_PROCESS   = 4'd2,   // process column blocks for current row
-        S_CNU_NEXT_ROW  = 4'd3,   // advance to next row
-        S_VNU_FETCH     = 4'd4,
-        S_VNU_PROCESS   = 4'd5,
-        S_VNU_NEXT_COL  = 4'd6,
-        S_SYNDROME      = 4'd7,
-        S_SYNDROME_WAIT = 4'd8,
-        S_DONE          = 4'd9
+    typedef enum logic [4:0] {
+        S_IDLE          = 5'd0,
+        // CNU phase: FETCH sets ROM addr, WAIT absorbs ROM latency, PROCESS reads result
+        S_CNU_FETCH     = 5'd1,
+        S_CNU_WAIT      = 5'd2,
+        S_CNU_PROCESS   = 5'd3,
+        S_CNU_NEXT_ROW  = 5'd4,
+        // VNU phase: same FETCH -> WAIT -> PROCESS pipeline
+        S_VNU_FETCH     = 5'd5,
+        S_VNU_WAIT      = 5'd6,
+        S_VNU_PROCESS   = 5'd7,
+        S_VNU_NEXT_COL  = 5'd8,
+        // Syndrome phase: sweep rows x cols like CNU, feeding syndrome checker
+        S_SYN_FETCH     = 5'd9,
+        S_SYN_WAIT      = 5'd10,
+        S_SYN_PROCESS   = 5'd11,
+        S_SYN_NEXT_ROW  = 5'd12,
+        S_SYN_CHECK     = 5'd13,   // check syndrome_pass after full sweep
+        S_DONE          = 5'd14
     } state_t;
 
     state_t state;
@@ -67,21 +82,16 @@ module iteration_ctrl #(
 
     // Edge tracking for first/last detection
     logic       seen_first_edge;
-    logic [4:0] last_edge_col;   // for CNU: last column with an edge in this row
-    logic [6:0] last_edge_row;   // for VNU: last row with an edge in this column
-
-    // Precomputed: we need to know last edge col for each row and last edge row for each col
-    // We'll detect first/last dynamically by scanning
 
     // Outputs
     assign iter_count = iter_cnt;
     assign current_row = row_cnt;
     assign current_col = col_cnt;
 
-    // Phase enables
+    // Phase enables — active only during PROCESS states when ROM data is valid
     assign cnu_enable      = (state == S_CNU_PROCESS);
     assign vnu_enable      = (state == S_VNU_PROCESS);
-    assign syndrome_enable = (state == S_SYNDROME) || (state == S_SYNDROME_WAIT);
+    assign syndrome_enable = (state == S_SYN_PROCESS);
     assign done            = (state == S_DONE);
 
     // =========================================================================
@@ -99,8 +109,6 @@ module iteration_ctrl #(
             first_row       <= 1'b0;
             last_row        <= 1'b0;
             seen_first_edge <= 1'b0;
-            last_edge_col   <= '0;
-            last_edge_row   <= '0;
         end else begin
             // Default deassertions
             first_col <= 1'b0;
@@ -123,20 +131,21 @@ module iteration_ctrl #(
 
                 // ---------------------------------------------------------
                 // CNU phase: sweep rows, for each row sweep columns
+                // FETCH -> WAIT -> PROCESS pipeline per column
                 // ---------------------------------------------------------
                 S_CNU_FETCH: begin
-                    // Wait 1 cycle for ROM to produce shift_val/has_edge
+                    // ROM address {row_cnt, col_cnt} is presented this cycle.
+                    // Wait one cycle for ROM output to become valid.
+                    state <= S_CNU_WAIT;
+                end
+
+                S_CNU_WAIT: begin
+                    // ROM output (has_edge, shift_val) is now valid.
                     state <= S_CNU_PROCESS;
                 end
 
-                // TODO(high): has_edge from base_matrix_rom has 1-cycle latency.
-                // Current design reads has_edge in S_CNU_PROCESS but the ROM
-                // address was set when entering S_CNU_FETCH. From the second
-                // column onward, the col_cnt increment in S_CNU_PROCESS means
-                // has_edge reflects the PREVIOUS column, not the current one.
-                // Fix: add a fetch-wait cycle for each column, or pipeline
-                // has_edge to align with the column being processed.
                 S_CNU_PROCESS: begin
+                    // has_edge is valid for current {row_cnt, col_cnt}
                     if (has_edge) begin
                         if (!seen_first_edge) begin
                             first_col <= 1'b1;
@@ -151,9 +160,9 @@ module iteration_ctrl #(
                             last_col <= 1'b1;
                         state <= S_CNU_NEXT_ROW;
                     end else begin
+                        // More columns to process — go back to FETCH
                         col_cnt <= col_cnt + 1'b1;
-                        // Stay in S_CNU_PROCESS (ROM has 1-cycle latency,
-                        // we read ahead since ROM was clocked last cycle)
+                        state   <= S_CNU_FETCH;
                     end
                 end
 
@@ -173,8 +182,15 @@ module iteration_ctrl #(
 
                 // ---------------------------------------------------------
                 // VNU phase: sweep columns, for each column sweep rows
+                // FETCH -> WAIT -> PROCESS pipeline per row
                 // ---------------------------------------------------------
                 S_VNU_FETCH: begin
+                    // ROM address {row_cnt, col_cnt} is presented this cycle.
+                    state <= S_VNU_WAIT;
+                end
+
+                S_VNU_WAIT: begin
+                    // ROM output is now valid.
                     state <= S_VNU_PROCESS;
                 end
 
@@ -191,7 +207,9 @@ module iteration_ctrl #(
                             last_row <= 1'b1;
                         state <= S_VNU_NEXT_COL;
                     end else begin
+                        // More rows to process — go back to FETCH
                         row_cnt <= row_cnt + 1'b1;
+                        state   <= S_VNU_FETCH;
                     end
                 end
 
@@ -199,7 +217,7 @@ module iteration_ctrl #(
                     seen_first_edge <= 1'b0;
                     if (col_cnt == NB - 1) begin
                         // Done with VNU phase, move to syndrome check
-                        state   <= S_SYNDROME;
+                        state   <= S_SYN_FETCH;
                         row_cnt <= '0;
                         col_cnt <= '0;
                     end else begin
@@ -210,21 +228,61 @@ module iteration_ctrl #(
                 end
 
                 // ---------------------------------------------------------
-                // Syndrome check phase
+                // Syndrome phase: sweep rows x cols like CNU, feeding the
+                // syndrome checker through first_col/last_col/last_row
+                // FETCH -> WAIT -> PROCESS pipeline per column
                 // ---------------------------------------------------------
-                // TODO(high): The syndrome checker needs column-by-column hard
-                // bits fed via first_col/last_col/last_row strobes, but this
-                // state does not drive any column scanning. The checker never
-                // receives data and syndrome_pass is undefined.
-                // Fix: sweep all row-blocks x col-blocks here (like CNU phase)
-                // feeding the syndrome checker, OR compute syndrome incrementally
-                // during VNU and just read the result here.
-                S_SYNDROME: begin
-                    // Allow syndrome checker some cycles to evaluate
-                    state <= S_SYNDROME_WAIT;
+                S_SYN_FETCH: begin
+                    // ROM address {row_cnt, col_cnt} is presented this cycle.
+                    state <= S_SYN_WAIT;
                 end
 
-                S_SYNDROME_WAIT: begin
+                S_SYN_WAIT: begin
+                    // ROM output is now valid.
+                    state <= S_SYN_PROCESS;
+                end
+
+                S_SYN_PROCESS: begin
+                    // Drive first_col for the syndrome checker
+                    if (has_edge) begin
+                        if (!seen_first_edge) begin
+                            first_col <= 1'b1;
+                            seen_first_edge <= 1'b1;
+                        end
+                    end
+
+                    // Check if this is the last column
+                    if (col_cnt == NB - 1) begin
+                        // last_col: end of this row's column sweep
+                        if (has_edge)
+                            last_col <= 1'b1;
+                        // last_row: final row AND final column
+                        if (has_edge && row_cnt == MB - 1)
+                            last_row <= 1'b1;
+                        state <= S_SYN_NEXT_ROW;
+                    end else begin
+                        // More columns — go back to FETCH
+                        col_cnt <= col_cnt + 1'b1;
+                        state   <= S_SYN_FETCH;
+                    end
+                end
+
+                S_SYN_NEXT_ROW: begin
+                    seen_first_edge <= 1'b0;
+                    if (row_cnt == MB - 1) begin
+                        // All rows processed, check syndrome result
+                        state <= S_SYN_CHECK;
+                    end else begin
+                        row_cnt <= row_cnt + 1'b1;
+                        col_cnt <= '0;
+                        state   <= S_SYN_FETCH;
+                    end
+                end
+
+                S_SYN_CHECK: begin
+                    // syndrome_checker produces valid + all_checks_pass
+                    // one cycle after last_row & last_col were asserted in S_SYN_PROCESS.
+                    // syndrome_pass = syndrome_valid & all_checks_pass (driven in ldpc_top).
                     if (syndrome_pass) begin
                         converged <= 1'b1;
                         state     <= S_DONE;
