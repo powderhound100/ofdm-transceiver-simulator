@@ -4,23 +4,28 @@ import numpy as np
 from .params import OfdmParams
 
 
-# QPSK constellation: b0 maps to I (real), b1 maps to Q (imag)
-# Index = b0*2 + b1: b0=0 -> I>0, b0=1 -> I<0, b1=0 -> Q>0, b1=1 -> Q<0
-_QPSK = np.array([1+1j, 1-1j, -1+1j, -1-1j]) / np.sqrt(2)
+def _build_rect_qam(n_i: int, n_q: int) -> np.ndarray:
+    """Build rectangular QAM constellation with unit average energy."""
+    levels_i = np.arange(-(n_i - 1), n_i, 2, dtype=np.float64)
+    levels_q = np.arange(-(n_q - 1), n_q, 2, dtype=np.float64)
+    grid = np.array([i + 1j * q for q in levels_q for i in levels_i])
+    e_avg = np.mean(np.abs(grid) ** 2)
+    return (grid / np.sqrt(e_avg)).astype(np.complex64)
 
-# 16QAM constellation: Gray-coded
-_16QAM_LEVELS = np.array([-3, -1, 1, 3]) / np.sqrt(10)
-_16QAM = np.array([i + 1j*q for q in _16QAM_LEVELS for i in _16QAM_LEVELS])
 
-# 64QAM constellation
-_64QAM_LEVELS = np.array([-7, -5, -3, -1, 1, 3, 5, 7]) / np.sqrt(42)
-_64QAM = np.array([i + 1j*q for q in _64QAM_LEVELS for i in _64QAM_LEVELS])
+_QPSK    = _build_rect_qam(2, 2)
+_16QAM   = _build_rect_qam(4, 4)
+_64QAM   = _build_rect_qam(8, 8)
+_256QAM  = _build_rect_qam(16, 16)
+_512QAM  = _build_rect_qam(32, 16)
+_1024QAM = _build_rect_qam(32, 32)
+_2048QAM = _build_rect_qam(64, 32)
 
 CONSTELLATIONS = {
-    "QPSK": _QPSK,
-    "16QAM": _16QAM,
-    "64QAM": _64QAM,
+    "QPSK": _QPSK, "16QAM": _16QAM, "64QAM": _64QAM,
+    "256QAM": _256QAM, "512QAM": _512QAM, "1024QAM": _1024QAM, "2048QAM": _2048QAM,
 }
+BPS = {"QPSK": 2, "16QAM": 4, "64QAM": 6, "256QAM": 8, "512QAM": 9, "1024QAM": 10, "2048QAM": 11}
 
 # Pilot value: known BPSK symbol (+1)
 PILOT_VALUE = 1.0 + 0.0j
@@ -31,12 +36,12 @@ def qam_map(bits: np.ndarray, modulation: str = "QPSK") -> np.ndarray:
 
     Args:
         bits: uint8 array of 0/1 values
-        modulation: "QPSK", "16QAM", or "64QAM"
+        modulation: "QPSK", "16QAM", "64QAM", "256QAM", "512QAM", "1024QAM", or "2048QAM"
 
     Returns:
         Complex64 array of QAM symbols
     """
-    bps = {"QPSK": 2, "16QAM": 4, "64QAM": 6}[modulation]
+    bps = BPS[modulation]
     constellation = CONSTELLATIONS[modulation]
 
     # Pad bits to multiple of bps
@@ -63,7 +68,7 @@ def qam_demap_soft(symbols: np.ndarray, noise_var: float,
 
     Returns float64 LLR array (positive = bit 0 more likely).
     """
-    bps = {"QPSK": 2, "16QAM": 4, "64QAM": 6}[modulation]
+    bps = BPS[modulation]
 
     if noise_var <= 0:
         noise_var = 1e-10
@@ -88,12 +93,9 @@ def qam_demap_soft(symbols: np.ndarray, noise_var: float,
         bit_mask = 1 << (bps - 1 - k)
         s0 = constellation[np.array([(i & bit_mask) == 0 for i in range(len(constellation))])]
         s1 = constellation[np.array([(i & bit_mask) != 0 for i in range(len(constellation))])]
-
-        for sym_idx in range(n_symbols):
-            y = symbols[sym_idx]
-            d0 = np.min(np.abs(y - s0) ** 2)
-            d1 = np.min(np.abs(y - s1) ** 2)
-            llr[sym_idx * bps + k] = (d1 - d0) / noise_var
+        d0 = np.min(np.abs(symbols[:, None] - s0[None, :]) ** 2, axis=1)
+        d1 = np.min(np.abs(symbols[:, None] - s1[None, :]) ** 2, axis=1)
+        llr[k::bps] = (d1 - d0) / noise_var
 
     return llr
 

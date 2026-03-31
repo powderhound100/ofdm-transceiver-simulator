@@ -25,48 +25,54 @@ class OfdmSimResult:
     snr_db: float
     modulation: str
     channel_model: str
+    estimator: str = "LS"
+    equalizer: str = "ZF"
 
     # Transmitter
-    info_bits: np.ndarray
-    coded_bits: np.ndarray
-    qam_symbols: np.ndarray
-    tx_signal: np.ndarray             # complex time-domain IQ
+    info_bits: np.ndarray = field(default=None)
+    coded_bits: np.ndarray = field(default=None)
+    qam_symbols: np.ndarray = field(default=None)
+    tx_signal: np.ndarray = field(default=None)             # complex time-domain IQ
 
     # Channel
-    rx_signal: np.ndarray             # complex IQ after channel
-    channel_taps: np.ndarray          # true channel impulse response
-    true_channel_freq: np.ndarray     # H(f) ground truth
+    rx_signal: np.ndarray = field(default=None)             # complex IQ after channel
+    channel_taps: np.ndarray = field(default=None)          # true channel impulse response
+    true_channel_freq: np.ndarray = field(default=None)     # H(f) ground truth
 
     # Receiver
-    raw_constellation: np.ndarray     # before equalization
-    eq_constellation: np.ndarray      # after equalization
-    estimated_channel: np.ndarray     # H_est(f) from pilots
-    soft_llr: np.ndarray
+    raw_constellation: np.ndarray = field(default=None)     # before equalization
+    eq_constellation: np.ndarray = field(default=None)      # after equalization
+    estimated_channel: np.ndarray = field(default=None)     # H_est(f) from pilots
+    soft_llr: np.ndarray = field(default=None)
 
     # LDPC
-    decoded_bits: np.ndarray
-    ldpc_iterations: int
-    ldpc_converged: bool
-    iteration_data: list
+    decoded_bits: np.ndarray = field(default=None)
+    ldpc_iterations: int = 0
+    ldpc_converged: bool = False
+    iteration_data: list = field(default_factory=list)
 
     # Performance
-    ber_uncoded: float                # QAM hard decision BER
-    ber_coded: float                  # post-LDPC BER
+    ber_uncoded: float = 0.0                # QAM hard decision BER
+    ber_coded: float = 0.0                  # post-LDPC BER
 
 
 def run_ofdm_chain(snr_db: float = 2.0,
                    modulation: str = "QPSK",
                    channel_model: str = "flat",
                    params: OfdmParams | None = None,
-                   seed: int = 42) -> OfdmSimResult:
+                   seed: int = 42,
+                   estimator: str = "LS",
+                   equalizer: str = "ZF") -> OfdmSimResult:
     """Run complete OFDM + LDPC chain.
 
     Args:
         snr_db: Channel SNR in dB
-        modulation: QAM order ("QPSK", "16QAM", "64QAM")
-        channel_model: Channel name ("flat", "two_tap", "tu6")
+        modulation: QAM order ("QPSK", "16QAM", "64QAM", "256QAM", "512QAM", "1024QAM", "2048QAM")
+        channel_model: Channel name ("flat", "two_tap", "tu6", etc.)
         params: OFDM parameters (uses defaults if None)
         seed: Random seed
+        estimator: Channel estimator ("LS", "LS_improved", "LMMSE")
+        equalizer: Equalizer type ("ZF", "MMSE")
 
     Returns:
         OfdmSimResult with all intermediate data for visualization
@@ -97,16 +103,21 @@ def run_ofdm_chain(snr_db: float = 2.0,
 
     # --- Receiver ---
     n_ofdm = params.symbols_per_codeword(code.N)
-    raw_const, eq_const, h_est = ofdm_demodulate(rx_signal, params, n_ofdm)
 
-    # Compute noise variance for soft demapping
+    # Compute noise variance for estimation / equalization
     snr_linear = 10 ** (snr_db / 10.0) if snr_db != float('inf') else 1e10
     sig_power = np.mean(np.abs(tx_signal.astype(np.complex128)) ** 2)
     noise_var = float(sig_power / snr_linear) if snr_linear > 0 else 1e-10
 
+    raw_const, eq_const, h_est, eff_noise = ofdm_demodulate(
+        rx_signal, params, n_ofdm,
+        estimator=estimator, equalizer=equalizer, noise_var=noise_var)
+
     # Soft demap equalized symbols -> LLR
+    # Use mean effective noise variance from equalizer output
+    demapping_noise = float(np.mean(eff_noise))
     n_coded_bits = code.N
-    soft_llr = qam_demap_soft(eq_const[:len(qam_symbols)], noise_var, modulation)
+    soft_llr = qam_demap_soft(eq_const[:len(qam_symbols)], demapping_noise, modulation)
 
     # Trim/pad LLR to match code length
     if len(soft_llr) > n_coded_bits:
@@ -129,6 +140,8 @@ def run_ofdm_chain(snr_db: float = 2.0,
         snr_db=snr_db,
         modulation=modulation,
         channel_model=channel_model,
+        estimator=estimator,
+        equalizer=equalizer,
         info_bits=info_bits,
         coded_bits=coded_bits,
         qam_symbols=qam_symbols,

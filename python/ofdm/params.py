@@ -21,7 +21,7 @@ class OfdmParams:
 
     @property
     def bits_per_symbol(self) -> int:
-        return {"QPSK": 2, "16QAM": 4, "64QAM": 6, "256QAM": 8}[self.modulation]
+        return {"QPSK": 2, "16QAM": 4, "64QAM": 6, "256QAM": 8, "512QAM": 9, "1024QAM": 10, "2048QAM": 11}[self.modulation]
 
     @property
     def subcarrier_spacing(self) -> float:
